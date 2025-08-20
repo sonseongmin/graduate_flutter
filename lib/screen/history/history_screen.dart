@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../home/today_workout_screen.dart';
+import '../home/workout_list_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -14,63 +14,77 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   DateTime selectedDay = DateTime.now();
 
-  final List<Map<String, dynamic>> allData = [
-    {
-      'date': '2025.07.10',
-      'name': '스쿼트',
-      'count': 15,
-      'calories': 80,
-      'time': 10,
-      'accuracy': 0.6
-    },
-    {
-      'date': '2025.07.11',
-      'name': '푸쉬업',
-      'count': 20,
-      'calories': 82,
-      'time': 11,
-      'accuracy': 0.65
-    },
-    {
-      'date': '2025.07.12',
-      'name': '런지',
-      'count': 25,
-      'calories': 84,
-      'time': 12,
-      'accuracy': 0.7
-    },
-    {
-      'date': '2025.07.13',
-      'name': '스쿼트',
-      'count': 30,
-      'calories': 86,
-      'time': 13,
-      'accuracy': 0.75
-    },
-  ];
+  List<Map<String, dynamic>> allData = [];
 
-  List<Map<String, dynamic>> getWeekData(DateTime baseDay) {
-    final formatter = DateFormat('yyyy.MM.dd');
-    return List.generate(7, (index) {
-      final date = baseDay.add(Duration(days: index));
-      final formatted = formatter.format(date);
-      final found = allData.firstWhere(
-            (item) => item['date'] == formatted,
-        orElse: () => {'date': formatted, 'name': '쉬는 날 😊'},
-      );
-      return found;
-    });
+  @override
+  void initState() {
+    super.initState();
+    fetchWorkoutData(); // 로컬 더미 데이터 로드
+  }
+
+  void fetchWorkoutData() {
+    // 추후 API 연동 시 여기에 HTTP 요청 추가
+    allData = [
+      {
+        'date': '2025.07.18',
+        'name': '스쿼트',
+        'count': 20,
+        'calories': 90,
+        'time': 12,
+        'accuracy': 0.75,
+        'issues': []
+      },
+      {
+        'date': '2025.07.20',
+        'name': '푸쉬업',
+        'count': 25,
+        'calories': 100,
+        'time': 15,
+        'accuracy': 0.8,
+        'issues': []
+      },
+      {
+        'date': '2025.07.23',
+        'name': '푸쉬업',
+        'count': 30,
+        'calories': 110,
+        'time': 13,
+        'accuracy': 0.85,
+        'issues': []
+      },
+    ];
+  }
+
+  Map<String, List<Map<String, dynamic>>> groupDataByDate() {
+    Map<String, List<Map<String, dynamic>>> grouped = {};
+    final today = DateTime.now();
+
+    // 최근 7일 날짜 초기화
+    for (int i = 0; i < 7; i++) {
+      final date = DateFormat('yyyy.MM.dd').format(today.subtract(Duration(days: i)));
+      grouped[date] = [];
+    }
+
+    for (var item in allData) {
+      String date = item['date'];
+      if (!grouped.containsKey(date)) {
+        grouped[date] = [];
+      }
+      grouped[date]!.add(item);
+    }
+
+    return grouped;
   }
 
   @override
   Widget build(BuildContext context) {
-    final weekData = getWeekData(selectedDay);
+    final groupedData = groupDataByDate();
 
     return Scaffold(
       backgroundColor: const Color(0xFFAED9A5),
       body: Column(
         children: [
-          // 상단 제목과 캘린더 버튼
+          // 상단 제목 + 캘린더 버튼
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
@@ -96,15 +110,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           width: MediaQuery.of(context).size.width * 0.9,
                           height: 450,
                           child: Column(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Expanded(
                                 child: TableCalendar(
                                   focusedDay: tempSelectedDay,
                                   firstDay: DateTime.utc(2020, 1, 1),
                                   lastDay: DateTime.utc(2030, 12, 31),
-                                  selectedDayPredicate: (day) =>
-                                      isSameDay(day, tempSelectedDay),
+                                  selectedDayPredicate: (day) => isSameDay(day, tempSelectedDay),
                                   onDaySelected: (day, _) {
                                     setState(() => tempSelectedDay = day);
                                   },
@@ -138,35 +150,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
 
-          // 히스토리 리스트
+          // 운동 날짜 리스트
           Expanded(
-            child: ListView.builder(
-              itemCount: weekData.length,
-              itemBuilder: (context, index) {
-                final item = weekData[index];
-                final date = item['date'];
-                final name = item['name'];
-                final bool isRest = name == '쉬는 날 😊';
+            child: ListView(
+              children: groupedData.entries.map((entry) {
+                String date = entry.key;
+                List<Map<String, dynamic>> exercises = entry.value;
+
+                double averageAccuracy = exercises.isNotEmpty
+                    ? exercises.map((e) => e['accuracy'] as double).fold(0.0, (prev, val) => prev + val) / exercises.length
+                    : 0.0;
 
                 return GestureDetector(
-                  onTap: isRest
-                      ? null
-                      : () {
+                  onTap: exercises.isNotEmpty
+                      ? () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => TodayWorkoutScreen(
-                          name: name,
-                          count: item['count'],
-                          calories: item['calories'],
-                          time: item['time'],
-                          accuracy: (item['accuracy'] * 100).toInt(),
+                        builder: (_) => WorkoutListScreen(
                           date: date,
-                          issues: const ['기록된 이슈 없음'],
+                          workouts: exercises,
                         ),
                       ),
                     );
-                  },
+                  }
+                      : null,
                   child: Container(
                     margin: const EdgeInsets.all(12),
                     padding: const EdgeInsets.all(16),
@@ -180,42 +188,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                date,
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
+                              Text(date,
+                                  style: const TextStyle(
+                                      fontSize: 16, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
-                              Text('운동: $name'),
-                              if (!isRest) ...[
-                                Text('횟수: ${item['count']}회'),
-                                Row(
-                                  children: [
-                                    const Text('🔥 '),
-                                    Text('${item['calories']} kcal'),
-                                    const SizedBox(width: 12),
-                                    const Text('⏱ '),
-                                    Text('${item['time']}분'),
-                                  ],
-                                ),
-                              ],
+                              Text(exercises.isNotEmpty
+                                  ? '운동 개수: ${exercises.length}개'
+                                  : '쉬어가는 날 😌'),
                             ],
                           ),
                         ),
-                        if (!isRest)
-                          CircularPercentIndicator(
-                            radius: 30,
-                            lineWidth: 8,
-                            percent: item['accuracy'],
-                            center: Text('${(item['accuracy'] * 100).toInt()}%'),
-                            progressColor: Colors.green,
-                            backgroundColor: Colors.grey[300]!,
-                          ),
+                        CircularPercentIndicator(
+                          radius: 30,
+                          lineWidth: 8,
+                          percent: exercises.isNotEmpty
+                              ? averageAccuracy.clamp(0.0, 1.0)
+                              : 0.0,
+                          center: Text(exercises.isNotEmpty
+                              ? '${(averageAccuracy * 100).toInt()}%'
+                              : '0%'),
+                          progressColor:
+                          exercises.isNotEmpty ? Colors.green : Colors.grey,
+                          backgroundColor: Colors.grey[300]!,
+                        ),
                       ],
                     ),
                   ),
                 );
-              },
+              }).toList(),
             ),
           ),
         ],
@@ -225,11 +225,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
         selectedItemColor: Colors.green[800],
         unselectedItemColor: Colors.grey,
         onTap: (index) {
-          if (index == 0) {
+          final current = ModalRoute.of(context)?.settings.name;
+
+          if (index == 0 && current != '/home') {
             Navigator.pushNamed(context, '/home');
-          } else if (index == 2) {
+          } else if (index == 1 && current != '/exercise_category') {
+            Navigator.pushNamed(context, '/exercise_category');
+          } else if (index == 2 && current != '/history') {
             Navigator.pushNamed(context, '/history');
-          } else if (index == 3) {
+          } else if (index == 3 && current != '/settings') {
             Navigator.pushNamed(context, '/settings');
           }
         },

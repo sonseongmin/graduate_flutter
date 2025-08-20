@@ -20,7 +20,9 @@ class InputField extends StatelessWidget {
       child: TextField(
         controller: controller,
         obscureText: obscure,
-        decoration: LoginStyle.inputDecoration.copyWith(hintText: hint),
+        decoration: LoginStyle.inputDecoration.copyWith(
+          hintText: hint,
+        ),
       ),
     );
   }

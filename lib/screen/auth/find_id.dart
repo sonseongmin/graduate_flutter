@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../../UI/login_style.dart';
 import '../../../UI/input_field.dart';
 import '../../../UI/green_button.dart';
@@ -14,12 +16,48 @@ class _FindIdScreenState extends State<FindIdScreen> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
 
-  void sendEmail() {
-    // 이메일 전송 로직 (백엔드 연동 예정)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('이메일이 전송되었습니다.')),
-    );
+  void sendEmail() async {
+    final email = emailController.text.trim();
+
+    final url = Uri.parse('http://127.0.0.1:8000/auth/find-username?email=$email');
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final username = data['username'];
+
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('아이디 찾기 성공'),
+          content: Text('가입하신 아이디는 "$username" 입니다.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      final data = jsonDecode(response.body);
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('찾을 수 없음'),
+          content: Text(data['detail'] ?? '아이디를 찾을 수 없습니다.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      );
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +79,7 @@ class _FindIdScreenState extends State<FindIdScreen> {
                 const SizedBox(height: 20),
                 InputField(controller: nameController, hint: '이름'),
                 InputField(controller: emailController, hint: '가입시 작성한 이메일'),
-                GreenButton(text: '이메일 보내기', onPressed: sendEmail),
+                GreenButton(text: '아이디 찾기', onPressed: sendEmail),
                 const SizedBox(height: 20),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),

@@ -5,14 +5,26 @@ import 'screen/auth/login.dart';
 import 'screen/auth/signup.dart';
 import 'screen/auth/find_account.dart';
 import 'screen/auth/find_id.dart';
-import 'screen/auth/find_password.dart';
+import 'screen/auth/verify_identity.dart';
 import 'screen/auth/signup_success.dart';
+import 'screen/auth/reset_password.dart';
 
 import 'screen/home/home_screen.dart';
 import 'screen/home/today_workout_screen.dart';
+import 'screen/home/workout_list_screen.dart';
+
 import 'screen/history/history_screen.dart';
 import 'screen/profile/setting_screen.dart';
 import 'screen/Inbody/inbody_screen.dart';
+
+import 'screen/video/video_upload_screen.dart';
+import 'screen/video/video_analysis_screen.dart';
+import 'screen/home/recommend_workout_screen.dart';
+
+import 'screen/video/exercise_category_screen.dart';
+
+
+
 
 void main() {
   runApp(const BodyLogApp());
@@ -30,7 +42,7 @@ class BodyLogApp extends StatelessWidget {
         primarySwatch: Colors.green,
         fontFamily: 'Pretendard',
       ),
-      initialRoute: '/',
+      initialRoute: '/home',
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
@@ -38,11 +50,15 @@ class BodyLogApp extends StatelessWidget {
         '/signup_success': (context) => const SignupSuccessScreen(),
         '/find_account': (context) => const FindAccountScreen(),
         '/find_id': (context) => const FindIdScreen(),
-        '/find_pw': (context) => const FindPasswordScreen(),
         '/home': (context) => const HomeScreen(),
         '/history': (context) => const HistoryScreen(),
-        '/settings': (context) => const SettingsScreen(userName: '홍길동'), // 임시 이름
+        '/settings': (context) => const SettingsScreen(),
         '/inbody': (context) => const InbodyScreen(),
+        '/workoutList': (_) => const WorkoutListScreen(date: '', workouts: []),
+        '/video_upload': (context) => const VideoUploadScreen(),
+        '/recommend': (context) => RecommendWorkoutScreen(),
+        '/verify_identity': (context) => const VerifyIdentityScreen(),
+        '/exercise_category': (context) => const ExerciseCategoryScreen(),
       },
     );
   }

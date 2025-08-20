@@ -33,8 +33,13 @@ dependencies:
   table_calendar: ^3.0.9
   percent_indicator: ^4.2.2
   intl: ^0.18.1
-
-
+  image_picker: ^1.0.0
+  video_player: ^2.2.18
+  http: ^0.13.6
+  shared_preferences: ^2.5.3
+  file_picker: ^5.2.2
+  camera: ^0.10.5+9
+  flutter_vlc_player: ^7.4.3
 
 dev_dependencies:
   flutter_test:

@@ -31,7 +31,7 @@ class FindAccountScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/find_pw'),
+                onPressed: () => Navigator.pushNamed(context, '/verify_identity'),
                 style: LoginStyle.greenButtonStyle,
                 child: const Text('비밀번호 찾기'),
               ),
