@@ -60,20 +60,20 @@ jobs:
           if [ -z "$EC2_HOST" ]; then
             echo "EC2_HOST is missing"; exit 1
           fi
-          if [ -z "$EC2_SSH_KEY_PEM" ]; then
-            echo "EC2_SSH_KEY_PEM is missing"; exit 1
+          if [ -z "$EC2_SSH_KEY_BASE64" ]; then
+            echo "EC2_SSH_KEY_BASE64 is missing"; exit 1
           fi
           echo "Secrets OK"
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_SSH_KEY_PEM: ${{ secrets.EC2_SSH_KEY_PEM }}
+          EC2_SSH_KEY_BASE64: ${{ secrets.EC2_SSH_KEY_BASE64 }}
 
       - name: SSH ping (debug)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY_PEM }}
+          key: ${{ secrets.EC2_SSH_KEY_BASE64 }}
           debug: true
           script_stop: true
           script: |
@@ -87,7 +87,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY_PEM }}
+          key: ${{ secrets.EC2_SSH_KEY_BASE64 }}
           script_stop: true
           envs: IMAGE_NAME,CONTAINER_NAME
           script: |
