@@ -7,7 +7,7 @@ on:
     paths:
       - "bodylog-frontend/**"
       - "Dockerfile"
-      - ".github/workflows/deploy-frontend.yml"
+      - ".github/workflows/deploy.yml"
       - ".dockerignore"
   workflow_dispatch:
 
