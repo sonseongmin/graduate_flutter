@@ -18,7 +18,7 @@ COPY pubspec.* ./
 RUN flutter pub get
 
 COPY . .
-RUN flutter build web --release --web-renderer canvaskit --pwa-strategy=offline-first
+RUN flutter build web --release
 
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
