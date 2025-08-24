@@ -41,8 +41,8 @@ jobs:
       - name: Build & Push (latest + sha)
         uses: docker/build-push-action@v6
         with:
-          context: ./bodylog-frontend
-          file: ./bodylog-frontend/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
