@@ -3,7 +3,7 @@ FROM ghcr.io/cirruslabs/flutter:3.27.2 AS build
 WORKDIR /app
 
 COPY pubspec.* ./
-RUN flutter pub get
+RUN flutter upgrade
 
 COPY . .
 RUN flutter build web --release --web-renderer canvaskit --pwa-strategy=offline-first
