@@ -68,12 +68,17 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_SSH_KEY_BASE64: ${{ secrets.EC2_SSH_KEY_BASE64 }}
 
+      - name: Decode SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY_BASE64 }}" | base64 -d > private_key.pem
+          chmod 600 private_key.pem
+
       - name: SSH ping (debug)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY_BASE64 }}
+          key_path: private_key.pem   
           debug: true
           script_stop: true
           script: |
@@ -87,7 +92,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY_BASE64 }}
+          key_path: private_key.pem   
           script_stop: true
           envs: IMAGE_NAME,CONTAINER_NAME
           script: |
