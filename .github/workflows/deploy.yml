@@ -15,7 +15,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY_BASE64 }}
           script: |
             # 프로젝트 경로로 이동 (처음엔 clone 필요)
             if [ ! -d "~/graduate_flutter" ]; then
