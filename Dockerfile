@@ -1,5 +1,5 @@
 # ===== 1) Build Stage: Flutter Web 빌드 =====
-FROM cirrusci/flutter:stable AS build
+FROM ghcr.io/cirruslabs/flutter:3.27.2 AS build
 WORKDIR /app
 
 COPY pubspec.* ./
