@@ -1,42 +1,19 @@
-name: Frontend CI (Flutter Web → Docker Hub)
+# ===== 1) Build Stage: Flutter Web 빌드 =====
+FROM cirrusci/flutter:stable AS build
+WORKDIR /app
 
-on:
-  push:
-    branches: ["main", "master"]
-    paths:
-      - "Dockerfile"
-      - "nginx.conf"
-      - "pubspec.yaml"
-      - ".github/workflows/deploy.yml"
-  workflow_dispatch:
+COPY pubspec.* ./
+RUN flutter pub get
 
-env:
-  DOCKER_IMAGE: sonseongmin/bodylog_frontend   # Docker Hub 리포 이름
+COPY . .
+RUN flutter build web --release --web-renderer canvaskit --pwa-strategy=offline-first
 
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+# ===== 2) Runtime Stage: Nginx로 정적 서빙 =====
+FROM nginx:alpine
 
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
+COPY nginx.conf /etc/nginx/conf.d/default.conf   # 🔥 nginx.conf 포함
+COPY --from=build /app/build/web/ /usr/share/nginx/html/
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build & Push
-        uses: docker/build-push-action@v6
-        with:
-          context: .               # 🔥 레포 루트 기준
-          file: ./Dockerfile       # 🔥 루트에 있는 Dockerfile
-          push: true
-          tags: |
-            ${{ env.DOCKER_IMAGE }}:latest
-            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
+EXPOSE 3000
+HEALTHCHECK --interval=10s --timeout=3s --retries=10 \
+  CMD wget -qO- http://localhost:3000/ || exit 1
