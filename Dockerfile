@@ -1,18 +1,28 @@
 # ===== 1) Build Stage: Flutter Web 빌드 =====
-FROM ghcr.io/cirruslabs/flutter:3.27.2 AS build
-WORKDIR /app
+FROM debian:bullseye AS build
 
+# 필수 패키지 설치
+RUN apt-get update && apt-get install -y \
+    curl unzip git xz-utils zip libglu1-mesa wget && \
+    rm -rf /var/lib/apt/lists/*
+
+# Flutter SDK 설치 (stable 채널)
+RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter -b stable
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+# Flutter SDK 확인
+RUN flutter --version && dart --version
+
+WORKDIR /app
 COPY pubspec.* ./
-RUN flutter upgrade
+RUN flutter pub get
 
 COPY . .
 RUN flutter build web --release --web-renderer canvaskit --pwa-strategy=offline-first
 
-# ===== 2) Runtime Stage: Nginx로 정적 서빙 =====
+# ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
-
-#nginx.conf 포함
-COPY nginx.conf /etc/nginx/conf.d/default.conf   
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build/web/ /usr/share/nginx/html/
 
 EXPOSE 3000
