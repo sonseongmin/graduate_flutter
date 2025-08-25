@@ -10,7 +10,7 @@ import '../../../UI/green_button.dart';
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
-  static const String baseUrl = 'http://127.0.0.1:8000';
+  static const String baseUrl = '/api';
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();

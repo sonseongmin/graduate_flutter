@@ -21,15 +21,10 @@ class VideoUploadScreen extends StatelessWidget {
     return effective;
   }
 
-  String _baseHost() {
-    if (kIsWeb) return '127.0.0.1';
-    if (Platform.isAndroid) return '10.0.2.2'; // Android 에뮬레이터
-    return '127.0.0.1';                        // iOS 시뮬레이터/데스크톱
-  }
 
   Future<void> _uploadFile(BuildContext context, File videoFile, String exercise) async {
     final host = _baseHost();
-    final uri = Uri.parse('http://$host:8000/api/v1/exercise/upload');
+    final uri = Uri.parse('/ai/analyze');
 
     final request = http.MultipartRequest('POST', uri);
 

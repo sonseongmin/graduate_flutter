@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/me'),
+      Uri.parse('/api/me'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
