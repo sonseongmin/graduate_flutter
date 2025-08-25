@@ -41,7 +41,7 @@ class _InbodyScreenState extends State<InbodyScreen> {
     if (token == null) return;
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/v1/inbody'),
+      Uri.parse('api/v1/inbody'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -132,7 +132,7 @@ class _InbodyScreenState extends State<InbodyScreen> {
     }
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/v1/inbody'),
+      Uri.parse('http://3.39.194.20:3000/api/v1/inbody'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

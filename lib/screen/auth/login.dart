@@ -43,7 +43,7 @@ class LoginScreen extends StatelessWidget {
                     final password = pwController.text;
 
                     final response = await http.post(
-                      Uri.parse('/api/login'),
+                      Uri.parse('http://3.39.194.20:3000/api/login'),
                       headers: {'Content-Type': 'application/json'},
                       body: jsonEncode({'username': username, 'password': password}),
                     );
@@ -66,7 +66,7 @@ class LoginScreen extends StatelessWidget {
                       // 2) 현재 계정의 인바디를 즉시 1회 동기화하여 캐시 채움
                       try {
                         final resp = await http.get(
-                          Uri.parse('/api/v1/inbody'),
+                          Uri.parse('http://3.39.194.20:3000/api/v1/inbody'),
                           headers: {'Authorization': 'Bearer $accessToken'},
                         );
 
