@@ -10,6 +10,7 @@ on:
       - "Dockerfile"
       - ".github/workflows/deploy.yml"
       - ".dockerignore"
+      - "nginx.conf"
   workflow_dispatch:
 
 env:
