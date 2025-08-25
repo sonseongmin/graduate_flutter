@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - "lib/**"
       - "bodylog-frontend/**"
       - "Dockerfile"
       - ".github/workflows/deploy.yml"
