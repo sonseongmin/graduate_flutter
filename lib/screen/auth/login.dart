@@ -9,7 +9,7 @@ import '../../../UI/green_button.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
-  static const String baseUrl = 'http://3.39.194.20:3000/api';
+  static const String baseUrl = 'http://3.39.194.20:3000';
 
   @override
   Widget build(BuildContext context) {
