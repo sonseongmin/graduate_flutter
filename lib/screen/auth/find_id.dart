@@ -19,7 +19,7 @@ class _FindIdScreenState extends State<FindIdScreen> {
   void sendEmail() async {
     final email = emailController.text.trim();
 
-    final url = Uri.parse('/api//auth/find-username?email=$email');
+    final url = Uri.parse('/api/auth/find-username?email=$email');
 
     final response = await http.get(url);
 
