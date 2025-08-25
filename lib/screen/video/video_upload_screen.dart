@@ -20,7 +20,25 @@ class VideoUploadScreen extends StatelessWidget {
     }
     return effective;
   }
+  String _baseHost() {
+    if (kIsWeb) {
+    // ✅ 웹: nginx 프록시 기준 → /api, /ai 같은 상대경로 사용
+      return '';
+    }
 
+    if (Platform.isAndroid) {
+    // ✅ 안드로이드 에뮬레이터에서 호스트 접근
+      return '10.0.2.2';
+    }
+
+    if (Platform.isIOS) {
+    // ✅ iOS 시뮬레이터
+      return '127.0.0.1';
+    }
+
+    // ✅ 기타(데스크탑 실행 등)
+    return '127.0.0.1';
+  }
 
   Future<void> _uploadFile(BuildContext context, File videoFile, String exercise) async {
     final host = _baseHost();
