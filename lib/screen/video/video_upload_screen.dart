@@ -20,11 +20,11 @@ class VideoUploadScreen extends StatelessWidget {
         return 'pushup';
       case '풀업':
         return 'pullup';
-      case '레그레이즈'
+      case '레그레이즈':
         return 'leg_raise';
-      case '점핑잭'
+      case '점핑잭':
         return 'jumping_jack';
-      case '플랭크'
+      case '플랭크':
         return 'plank';
       default:
         return exercise; // 혹시 대응 안 된 거 들어오면 그대로 보냄
