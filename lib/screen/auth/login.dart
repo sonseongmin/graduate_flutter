@@ -51,13 +51,13 @@ class LoginScreen extends StatelessWidget {
                     if (response.statusCode == 200) {
                       final data = jsonDecode(response.body);
                       final accessToken = data['access_token'];
-                      //final userName = data['name']?.toString() ?? '';
+                      final userName = data['name']?.toString() ?? '';
 
                       final prefs = await SharedPreferences.getInstance();
 
                       // 기본 사용자 정보 저장
                       await prefs.setString('access_token', accessToken);
-                      //await prefs.setString('user_name', userName);
+                      await prefs.setString('user_name', userName);
 
                       // 1) 이전 계정 잔여 인바디 표시값 초기화
                       await prefs.remove('inbody_sex');
