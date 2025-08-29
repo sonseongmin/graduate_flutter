@@ -132,19 +132,16 @@ class VideoUploadScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (!kIsWeb) ...[
-              ElevatedButton.icon(
-                onPressed: () => _openCameraRecorder(context, exercise),
-                icon: const Icon(Icons.videocam, color: Colors.white),
-                label: const Text('실시간 촬영',
-                    style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
+            ElevatedButton.icon(
+              onPressed: () => _openCameraRecorder(context, exercise),
+              icon: const Icon(Icons.videocam, color: Colors.white),
+              label: const Text('실시간 촬영', style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade200,
                   minimumSize: const Size.fromHeight(60),
                 ),
               ),
               const SizedBox(height: 20),
-            ],
             ElevatedButton.icon(
               onPressed: () => _pickAndUpload(context, exercise),
               icon: const Icon(Icons.upload_file, color: Colors.white),
