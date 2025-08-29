@@ -11,7 +11,25 @@ import 'package:camera/camera.dart';
 class VideoUploadScreen extends StatelessWidget {
   final String? exerciseName;
   const VideoUploadScreen({super.key, this.exerciseName = '스쿼트'});
-
+  
+  String mapExerciseName(String exercise) {
+    switch (exercise) {
+      case '스쿼트':
+        return 'squat';
+      case '푸쉬업':
+        return 'pushup';
+      case '풀업':
+        return 'pullup';
+      case '레그레이즈'
+        return 'leg_raise';
+      case '점핑잭'
+        return 'jumping_jack';
+      case '플랭크'
+        return 'plank';
+      default:
+        return exercise; // 혹시 대응 안 된 거 들어오면 그대로 보냄
+    }
+  }
   String _resolveExerciseName(BuildContext context) {
     String effective = exerciseName ?? '스쿼트';
     final args = ModalRoute.of(context)?.settings.arguments;
@@ -55,7 +73,7 @@ class VideoUploadScreen extends StatelessWidget {
       request.headers['Authorization'] = 'Bearer $token';
     }
 
-    request.fields['category'] = exercise;
+    request.fields['exercise'] = mapExerciseName(exercise);
 
     // 📌 웹은 fromBytes, 모바일은 fromPath
     if (kIsWeb && bytes != null && filename != null) {
