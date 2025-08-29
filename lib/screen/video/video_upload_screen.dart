@@ -73,7 +73,7 @@ class VideoUploadScreen extends StatelessWidget {
       request.headers['Authorization'] = 'Bearer $token';
     }
 
-    request.fields['exercise'] = mapExerciseName(exercise);
+    request.fields['category'] = mapExerciseName(exercise);
 
     // 📌 웹은 fromBytes, 모바일은 fromPath
     if (kIsWeb && bytes != null && filename != null) {
