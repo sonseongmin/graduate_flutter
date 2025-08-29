@@ -45,7 +45,7 @@ class VideoUploadScreen extends StatelessWidget {
     String? filename,
   }) async {
     final host = _baseUrl();
-    final uri = Uri.parse('$host/ai/analyze');
+    final uri = Uri.parse('http://3.39.194.20:3000/api/v1/exercise/analyze');
 
     final request = http.MultipartRequest('POST', uri);
 
