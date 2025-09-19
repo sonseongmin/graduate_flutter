@@ -22,9 +22,11 @@ RUN flutter build web --release
 
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 👉 심플 default.conf로 교체 (SSL 없음, 정적 파일만)
+COPY default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build/web/ /usr/share/nginx/html/
 
-EXPOSE 3000
+EXPOSE 80
 HEALTHCHECK --interval=10s --timeout=3s --retries=10 \
-  CMD wget -qO- http://localhost:3000/ || exit 1
+  CMD wget -qO- http://localhost:80/ || exit 1
