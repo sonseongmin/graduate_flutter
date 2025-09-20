@@ -24,8 +24,6 @@ RUN flutter build web --release
 FROM nginx:alpine
 
 # 👉 심플 default.conf로 교체 (SSL 없음, 정적 파일만)
-COPY app.conf /etc/nginx/conf.d/default.conf
-
 COPY --from=build /app/build/web/ /usr/share/nginx/html/
 
 EXPOSE 80
