@@ -20,7 +20,7 @@ RUN flutter pub get --no-precompile
 COPY . ./
 RUN flutter doctor -v
 RUN flutter precache --force --web
-RUN flutter build web --release --no-tree-shake-icons --no-sound-null-safety
+RUN flutter build web --release --no-tree-shake-icons --no-sound-null-safety --verbose
 
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
