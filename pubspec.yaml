@@ -1,0 +1,47 @@
+name: body_log
+description: "운동 기록 앱"
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  table_calendar: ^3.0.9
+  percent_indicator: ^4.2.2
+  intl: ^0.18.1
+  image_picker: ^1.0.0
+  video_player: ^2.2.18
+  http: ^0.13.6
+  shared_preferences: ^2.5.3
+  file_picker: ^6.1.1
+  camera: ^0.10.5+9
+  flutter_vlc_player: ^7.4.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/squat.png
+    - assets/default.png
+    - assets/jumping_jack.png
+    - assets/logo.png
+    - assets/logo2.png
+    - assets/pushup.png
+    - assets/pullup.png
+  fonts:
+    - family: Gamwulchi
+      fonts:
+        - asset: assets/fonts/GamwulchiFreeGothicTTF.ttf
+          weight: 400
+
