@@ -21,7 +21,7 @@ COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
 
 COPY . ./
-RUN flutter build web --release --no-tree-shake-icons --no-sound-null-safety
+RUN flutter build web --release --no-tree-shake-icons 
 
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
