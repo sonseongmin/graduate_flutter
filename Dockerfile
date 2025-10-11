@@ -10,9 +10,9 @@ RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
 WORKDIR /usr/local/flutter
 RUN git fetch --tags
 RUN git checkout tags/3.7.2 -b stable-3.7.2
-RUN flutter --version
 
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+RUN flutter --version
 WORKDIR /app
 
 COPY pubspec.yaml pubspec.lock ./
