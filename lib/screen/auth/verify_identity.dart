@@ -39,7 +39,7 @@ class _VerifyIdentityScreenState extends State<VerifyIdentityScreen> {
     setState(() => isLoading = true);
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/auth/verify-identity'),
+      Uri.parse('/api/auth/verify-identity'),
       headers: {'Content-Type': 'application/json; charset=utf-8'},
       body: jsonEncode({
         'username': username,

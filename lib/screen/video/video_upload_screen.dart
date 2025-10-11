@@ -24,15 +24,22 @@ class VideoUploadScreen extends StatelessWidget {
     return effective;
   }
 
-  String _baseHost() {
-    if (kIsWeb) return '127.0.0.1';
-    if (Platform.isAndroid) return '10.0.2.2';
-    return '127.0.0.1';
+  String _baseUrl() {
+    if (kIsWeb) {
+      // ✅ 웹: nginx 프록시 기준 절대 URL
+      return 'http://3.39.194.20:3000';
+    }
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:5000';
+    }
+    if (Platform.isIOS) {
+      return 'http://127.0.0.1:5000';
+    }
+    return 'http://127.0.0.1:5000';
   }
-
   Future<void> _uploadFile(BuildContext context, File videoFile, String exercise) async {
-    final host = _baseHost();
-    final uri = Uri.parse('http://$host:8000/api/v1/exercise/analyze');
+    final host = _baseUrl();
+    final uri = Uri.parse('/api/v1/exercise/analyze');
 
     final request = http.MultipartRequest('POST', uri);
 
@@ -227,7 +234,7 @@ class VideoUploadScreen extends StatelessWidget {
     timer = Timer.periodic(const Duration(milliseconds: 900), (t) async {
       if (!context.mounted) return;
 
-      final uri = Uri.parse('http://$host:8000/api/v1/exercise/status/$jobId');
+      final uri = Uri.parse('/api/v1/exercise/status/$jobId');
       final headers = <String, String>{};
       if (token != null && token.isNotEmpty) {
         headers['Authorization'] = 'Bearer $token';
