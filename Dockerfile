@@ -1,7 +1,6 @@
 # ===== 1) Build Stage: Flutter Web 빌드 =====
 FROM debian:bullseye AS build
 
-# 필수 패키지 설치
 RUN apt-get update && apt-get install -y \
     curl unzip git xz-utils zip libglu1-mesa wget && \
     rm -rf /var/lib/apt/lists/*
@@ -10,22 +9,24 @@ RUN apt-get update && apt-get install -y \
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter -b stable
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
-# Flutter SDK 확인
-RUN flutter --version && dart --version
+# Flutter 환경 초기화
+RUN flutter doctor -v
+RUN flutter config --enable-web
+RUN flutter precache --web
 
 WORKDIR /app
+
+# 의존성 다운로드
 COPY pubspec.* ./
 RUN flutter pub get
 
+# 나머지 복사 및 빌드
 COPY . .
 RUN flutter build web --release
 
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
-
-# 👉 심플 default.conf로 교체 (SSL 없음, 정적 파일만)
 COPY --from=build /app/build/web/ /usr/share/nginx/html/
-
 EXPOSE 80
 HEALTHCHECK --interval=10s --timeout=3s --retries=10 \
   CMD wget -qO- http://localhost:80/ || exit 1
