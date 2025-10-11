@@ -5,22 +5,23 @@ RUN apt-get update && apt-get install -y \
     curl unzip git xz-utils zip libglu1-mesa wget && \
     rm -rf /var/lib/apt/lists/*
 
-# Flutter SDK 설치 (stable 채널)
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter -b stable
-ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+# Flutter SDK 3.7.2 버전 고정
+RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
+WORKDIR /usr/local/flutter
+RUN git checkout 3.7.2
 
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 WORKDIR /app
 
-# 의존성 다운로드
 COPY pubspec.yaml pubspec.lock ./
-RUN flutter pub get
+RUN flutter config --enable-web
+RUN flutter pub get --no-precompile
 
-# 나머지 복사 및 빌드
-COPY . .
+COPY . ./
 RUN flutter doctor -v
 RUN flutter precache --force --web
 RUN flutter build web --release --no-tree-shake-icons --no-sound-null-safety
-# ===== 2) Runtime Stage: Nginx =====
+
 FROM nginx:alpine
 COPY --from=build /app/build/web/ /usr/share/nginx/html/
 EXPOSE 80
