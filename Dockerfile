@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 # Flutter SDK 3.7.2 버전 고정
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
 WORKDIR /usr/local/flutter
-RUN git checkout 3.7.2
+RUN git checkout 3.7.2-stable
 
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 WORKDIR /app
