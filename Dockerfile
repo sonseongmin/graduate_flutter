@@ -22,8 +22,8 @@ RUN flutter pub get
 
 # 나머지 복사 및 빌드
 COPY . .
-RUN flutter build web --release
-
+RUN flutter precache --force --web
+RUN flutter build web --release --no-tree-shake-icons --no-sound-null-safety
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
 COPY --from=build /app/build/web/ /usr/share/nginx/html/
