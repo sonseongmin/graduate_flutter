@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'file_adapter_stub.dart';
+import 'stub_adapter.dart';
 import 'file_adapter.dart';
 
 class BaseFileAdapter implements BaseFileAdapter {
