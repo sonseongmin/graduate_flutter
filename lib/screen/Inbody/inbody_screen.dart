@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:body_log/util/token_helper.dart';
+
 const baseUrl = "http://13.125.219.3";
+
 class InbodyScreen extends StatefulWidget {
   const InbodyScreen({super.key});
 
@@ -38,9 +40,11 @@ class _InbodyScreenState extends State<InbodyScreen> {
 
   Future<void> fetchInbodyData() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // ✅ 토큰 먼저 선언하고 나중에 null 체크
+    final token = await TokenHelper.getToken();
     if (token == null) return;
 
-    final token = await TokenHelper.getToken();
     final response = await http.get(
       Uri.parse('$baseUrl/api/v1/inbody'),
       headers: {'Authorization': 'Bearer $token'},
@@ -79,7 +83,7 @@ class _InbodyScreenState extends State<InbodyScreen> {
             : '';
       });
 
-      // 값 있을 때만 저장, 없으면 제거
+      // ✅ SharedPreferences 갱신
       if (selectedGender == null) {
         await prefs.remove('inbody_sex');
       } else {
@@ -92,7 +96,6 @@ class _InbodyScreenState extends State<InbodyScreen> {
         await prefs.setString('inbody_birth', birthController.text.trim());
       }
     } else {
-      // 조회 실패 시 이전 표시값 제거 (계정 전환/신규 사용자 보호)
       await prefs.remove('inbody_sex');
       await prefs.remove('inbody_birth');
       debugPrint('❌ 인바디 조회 실패: ${response.statusCode} - ${response.body}');
@@ -132,8 +135,9 @@ class _InbodyScreenState extends State<InbodyScreen> {
       return;
     }
 
+    // ✅ baseUrl 누락 수정
     final response = await http.post(
-      Uri.parse('/api/v1/inbody'),
+      Uri.parse('$baseUrl/api/v1/inbody'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -176,11 +180,12 @@ class _InbodyScreenState extends State<InbodyScreen> {
             fontSize: 24,
             fontFamily: 'Gamwulchi',
             fontWeight: FontWeight.bold,
-            color: Colors.black, // 글씨 색상 (필요 시 조정)
+            color: Colors.black,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,),
+        backgroundColor: Colors.white,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -243,7 +248,8 @@ class _InbodyScreenState extends State<InbodyScreen> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4E4E4E),
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 32),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
