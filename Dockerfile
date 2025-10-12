@@ -24,7 +24,7 @@ COPY . .
 RUN flutter analyze || true
 
 # 캐시 미사용 강제 빌드 (문제 추적용)
-RUN flutter build web --release --no-tree-shake-icons -v --no-pub || (cat /app/.dart_tool/flutter_build/* 2>/dev/null || true)
+RUN flutter build web --release --no-tree-shake-icons -v --no-pub > /app/flutter_build_log.txt 2>&1 || (cat /app/flutter_build_log.txt && exit 1)
 
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
