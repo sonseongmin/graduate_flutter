@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     curl unzip git xz-utils zip libglu1-mesa wget ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Flutter SDK 설치 (3.19.6 고정)
+# Flutter SDK 설치 (3.22.2 고정)
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter -b 3.22.2
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
@@ -23,7 +23,8 @@ COPY . .
 
 # flutter analyze는 실패해도 통과
 RUN flutter analyze || true
-
+# flutter 캐시 초기화 및 환경확인
+RUN flutter doctor -v
 # 깨끗하게 정리하고 빌드
 RUN flutter clean
 RUN flutter build web --release --no-tree-shake-icons -v
