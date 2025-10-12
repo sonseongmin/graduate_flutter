@@ -25,11 +25,16 @@ class WebFileAdapter implements IFileAdapter {
       ..open('POST', 'http://13.125.219.3/api/v1/exercise/analyze')
       ..setRequestHeader('Authorization', 'Bearer $token')
       ..onLoadEnd.listen((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        if (req.status == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('✅ 업로드 성공!')),
+          );
+        } else if (req.status == 0 && (req.responseText?.isEmpty ?? true)) {
+          debugPrint('사용자가 파일 선택을 취소함');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(req.status == 200
-                ? '✅ 업로드 성공!'
-                : '❌ 업로드 실패 (${req.status})'),
+            SnackBar(content: Text('❌ 업로드 실패 (${req.status})')),
           ),
         );
       });

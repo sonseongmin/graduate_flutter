@@ -25,10 +25,15 @@ class MobileFileAdapter implements IFileAdapter {
       ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
     final res = await request.send();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(res.statusCode == 200 ? '✅ 업로드 성공' : '❌ 실패')),
-    );
-  }
+    if (res.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('✅ 업로드 성공')),
+            );
+        } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('❌ 실패 (코드: ${res.statusCode})')),
+        );
+    }
 
   @override
   Future<void> openCamera(BuildContext context, String exercise) async {
