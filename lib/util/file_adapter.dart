@@ -1,3 +1,4 @@
+// lib/util/file_adapter.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,12 +6,14 @@ import 'web_file_adapter.dart';
 import 'mobile_file_adapter.dart';
 import 'stub_adapter.dart';
 
+// ✅ 웹 전용 import (조건부 import)
+import 'dart:html' as html
+    if (dart.library.io) 'dart:io' show Platform;
+
 // ✅ 토큰 불러오기 (웹/모바일 대응)
 Future<String?> getAccessToken() async {
   try {
     if (kIsWeb) {
-      // ignore: avoid_web_libraries_in_flutter
-      import 'dart:html' as html;
       return html.window.localStorage['access_token'];
     } else {
       final prefs = await SharedPreferences.getInstance();
