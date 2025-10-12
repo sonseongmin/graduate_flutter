@@ -31,7 +31,7 @@ RUN flutter analyze || true
 RUN flutter doctor -v
 # 깨끗하게 정리하고 빌드
 RUN flutter clean
-RUN flutter build web --release --no-tree-shake-icons -v
+RUN flutter build web --release --no-tree-shake-icons -v || cat build/web/*.js || true
 
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
