@@ -6,35 +6,46 @@ import 'file_adapter.dart';
 
 class WebFileAdapter {
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.video);
-    if (result == null) throw Exception('파일 선택 취소됨');
-
-    final fileBytes = result.files.first.bytes;
-    final fileName = result.files.first.name;
-    if (fileBytes == null) throw Exception('파일을 읽을 수 없음');
-
+    // ✅ 토큰 불러오기
     final token = await getAccessToken();
-
-    final req = http.MultipartRequest(
-      'POST',
-      Uri.parse('http://13.125.219.3/api/v1/exercise/analyze'),
-    );
-
-    if (token != null && token.isNotEmpty) {
-      req.headers['Authorization'] = 'Bearer $token';
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
     }
 
-    req.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
+    final input = html.FileUploadInputElement()..accept = 'video/*';
+    input.click();
 
-    final streamed = await req.send();
-    final res = await http.Response.fromStream(streamed);
+    await input.onChange.first;
+    final file = input.files?.first;
+    if (file == null) return;
 
-    if (res.statusCode != 202) {
-      throw Exception('서버 오류: ${res.statusCode} ${res.body}');
-    }
+    final formData = html.FormData();
+    formData.appendBlob('file', file);
+    formData.append('exercise', exercise);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('서버 업로드 완료! 분석이 곧 시작됩니다.')),
-    );
+    final request = html.HttpRequest();
+    request
+      ..open('POST', 'http://13.125.219.3/api/v1/exercise/analyze')
+      ..setRequestHeader('Authorization', 'Bearer $token') // ✅ 핵심!
+      ..onLoadEnd.listen((event) {
+        if (request.status == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('✅ 업로드 성공! 분석 중입니다.')),
+          );
+        } else if (request.status == 403) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('❌ 인증 실패: 로그인 정보가 만료되었습니다.')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('❌ 업로드 실패 (${request.status})')),
+          );
+        }
+      });
+
+    request.send(formData);
   }
 }

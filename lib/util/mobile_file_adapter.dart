@@ -6,57 +6,92 @@ import 'file_adapter.dart';
 import 'package:camera/camera.dart';
 
 class MobileFileAdapter {
+  /// 갤러리에서 영상 선택 후 업로드
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.video);
-    if (result == null) throw Exception('파일 선택 취소됨');
+    final picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+    if (pickedFile == null) return;
 
-    final path = result.files.first.path;
-    if (path == null) throw Exception('파일 경로 없음');
+    final file = File(pickedFile.path);
 
-    final file = File(path);
+    // ✅ 토큰 불러오기
     final token = await getAccessToken();
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
 
-    final req = http.MultipartRequest(
+    final request = http.MultipartRequest(
       'POST',
       Uri.parse('http://13.125.219.3/api/v1/exercise/analyze'),
     );
 
-    if (token != null && token.isNotEmpty) {
-      req.headers['Authorization'] = 'Bearer $token';
+    // ✅ Authorization 헤더 추가
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Content-Type'] = 'multipart/form-data';
+
+    // ✅ 파일 추가
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+
+    // ✅ 운동 이름 전달 (필요 시)
+    request.fields['exercise'] = exercise;
+
+    // ✅ 요청 보내기
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ 업로드 성공! 분석 중입니다.')),
+      );
+    } else if (response.statusCode == 403) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('❌ 인증 실패: 로그인 정보가 만료되었습니다.')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ 업로드 실패 (${response.statusCode})')),
+      );
     }
-
-    req.files.add(await http.MultipartFile.fromPath('file', file.path));
-    final streamed = await req.send();
-    final res = await http.Response.fromStream(streamed);
-
-    if (res.statusCode != 202) {
-      throw Exception('서버 오류: ${res.statusCode} ${res.body}');
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('업로드 완료! 분석 대기 중...')),
-    );
   }
 
-  // 📸 카메라 녹화용
+  /// 카메라로 촬영 후 업로드
   Future<void> recordAndUpload(BuildContext context, String exercise) async {
-    final cameras = await availableCameras();
-    final backCamera = cameras.firstWhere(
-      (c) => c.lensDirection == CameraLensDirection.back,
-      orElse: () => cameras.first,
+    final picker = ImagePicker();
+    final XFile? recordedFile = await picker.pickVideo(source: ImageSource.camera);
+    if (recordedFile == null) return;
+
+    final file = File(recordedFile.path);
+
+    final token = await getAccessToken();
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://13.125.219.3/api/v1/exercise/analyze'),
     );
 
-    final controller = CameraController(backCamera, ResolutionPreset.medium);
-    await controller.initialize();
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Content-Type'] = 'multipart/form-data';
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    request.fields['exercise'] = exercise;
 
-    final video = await controller.startVideoRecording();
-    await Future.delayed(const Duration(seconds: 5)); // 5초만 테스트 촬영
-    await controller.stopVideoRecording();
+    final response = await request.send();
 
-    controller.dispose();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('촬영 완료! (아직 서버 업로드 미구현)')),
-    );
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ 업로드 성공! 분석 중입니다.')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ 업로드 실패 (${response.statusCode})')),
+      );
+    }
   }
 }
