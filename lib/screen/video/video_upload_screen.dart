@@ -25,9 +25,9 @@ class VideoUploadScreen extends StatelessWidget {
   }
 
   String _baseHost() {
-    if (kIsWeb) return 'http://3.39.194.20:3000';
+    if (kIsWeb) return 'http://13.125.219.3';
     if (Platform.isAndroid) return 'http://10.0.2.2';
-    return 'http://3.39.194.20:3000';
+    return 'http://13.125.219.3';
   }
 
   Future<void> _uploadFile(BuildContext context, File videoFile, String exercise) async {
