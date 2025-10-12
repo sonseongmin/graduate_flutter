@@ -1,6 +1,5 @@
-class StubFileAdapter {
-  Future<dynamic> pickVideo() async {
-    print('[STUB] File picking not supported on this platform.');
-    return null;
+class FileAdapter {
+  Future<void> pickAndUpload(context, String exercise) async {
+    throw UnsupportedError('File picking not supported on this platform.');
   }
 }

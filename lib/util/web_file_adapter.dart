@@ -1,21 +1,23 @@
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 import 'dart:typed_data';
-import 'package:file_picker/file_picker.dart';
+import 'dart:html' as html;
+import 'package:http/http.dart' as http;
 
-class WebFileAdapter {
-  Future<html.File?> pickVideo() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.video);
-    if (result == null || result.files.isEmpty) return null;
+class FileAdapter {
+  Future<void> pickAndUpload(context, String exercise) async {
+    final uploadInput = html.FileUploadInputElement()..accept = 'video/*';
+    uploadInput.click();
+    await uploadInput.onChange.first;
+    final file = uploadInput.files?.first;
+    if (file == null) return;
 
-    final fileBytes = result.files.first.bytes;
-    final fileName = result.files.first.name;
-    if (fileBytes == null) return null;
+    final reader = html.FileReader();
+    reader.readAsArrayBuffer(file);
+    await reader.onLoad.first;
+    final bytes = reader.result as Uint8List;
 
-    final blob = html.Blob([Uint8List.fromList(fileBytes)]);
-    final file = html.File([blob], fileName, {'type': 'video/mp4'});
-
-    print('[WEB] Selected file: $fileName (${fileBytes.lengthInBytes} bytes)');
-    return file;
+    final uri = Uri.parse('http://13.125.219.3/api/v1/exercise/analyze');
+    final req = http.MultipartRequest('POST', uri)
+      ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: file.name));
+    await req.send();
   }
 }

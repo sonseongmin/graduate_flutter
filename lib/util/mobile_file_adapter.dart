@@ -1,15 +1,16 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
 
-class MobileFileAdapter {
-  Future<File?> pickVideo() async {
+class FileAdapter {
+  Future<void> pickAndUpload(context, String exercise) async {
     final result = await FilePicker.platform.pickFiles(type: FileType.video);
-    if (result == null || result.files.isEmpty) return null;
+    if (result == null || result.files.single.path == null) return;
 
-    final path = result.files.first.path;
-    if (path == null) return null;
-
-    print('[MOBILE] Selected file: $path');
-    return File(path);
+    final file = File(result.files.single.path!);
+    final uri = Uri.parse('http://10.0.2.2/api/v1/exercise/analyze');
+    final req = http.MultipartRequest('POST', uri)
+      ..files.add(await http.MultipartFile.fromPath('file', file.path));
+    await req.send();
   }
 }
