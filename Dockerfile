@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Flutter SDK 설치 (3.19.6 고정)
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter -b 3.19.6
+RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter -b 3.22.2
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 WORKDIR /app
