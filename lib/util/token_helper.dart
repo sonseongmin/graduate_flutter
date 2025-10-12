@@ -4,10 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TokenHelper {
   static Future<String?> getToken() async {
     if (kIsWeb) {
-      // ✅ wasm 빌드 호환용: html import 대신 JS interop 사용
       try {
         final value = _getTokenFromWeb();
-        return value;
+        return value.isEmpty ? null : value;
       } catch (_) {
         return null;
       }
@@ -17,9 +16,8 @@ class TokenHelper {
     return prefs.getString('access_token');
   }
 
-  // ✅ JS interop을 사용해 localStorage 접근
-  static String? _getTokenFromWeb() {
-    // ignore: undefined_prefixed_name
-    return const String.fromEnvironment('ACCESS_TOKEN', defaultValue: null);
+  static String _getTokenFromWeb() {
+    // ⚠️ null은 const 문맥에서 허용 안됨 → 빈 문자열로 대체
+    return const String.fromEnvironment('ACCESS_TOKEN', defaultValue: '');
   }
 }
