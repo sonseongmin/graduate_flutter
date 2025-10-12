@@ -1,23 +1,40 @@
-import 'dart:typed_data';
-import 'dart:html' as html;
+import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
+import 'file_adapter.dart';
 
-class FileAdapter {
-  Future<void> pickAndUpload(context, String exercise) async {
-    final uploadInput = html.FileUploadInputElement()..accept = 'video/*';
-    uploadInput.click();
-    await uploadInput.onChange.first;
-    final file = uploadInput.files?.first;
-    if (file == null) return;
+class WebFileAdapter {
+  Future<void> pickAndUpload(BuildContext context, String exercise) async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.video);
+    if (result == null) throw Exception('파일 선택 취소됨');
 
-    final reader = html.FileReader();
-    reader.readAsArrayBuffer(file);
-    await reader.onLoad.first;
-    final bytes = reader.result as Uint8List;
+    final fileBytes = result.files.first.bytes;
+    final fileName = result.files.first.name;
+    if (fileBytes == null) throw Exception('파일을 읽을 수 없음');
 
-    final uri = Uri.parse('http://13.125.219.3/api/v1/exercise/analyze');
-    final req = http.MultipartRequest('POST', uri)
-      ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: file.name));
-    await req.send();
+    final token = await getAccessToken();
+
+    final req = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://13.125.219.3/api/v1/exercise/analyze'),
+    );
+
+    if (token != null && token.isNotEmpty) {
+      req.headers['Authorization'] = 'Bearer $token';
+    }
+
+    req.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
+
+    final streamed = await req.send();
+    final res = await http.Response.fromStream(streamed);
+
+    if (res.statusCode != 202) {
+      throw Exception('서버 오류: ${res.statusCode} ${res.body}');
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('서버 업로드 완료! 분석이 곧 시작됩니다.')),
+    );
   }
 }

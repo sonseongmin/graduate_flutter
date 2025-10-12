@@ -82,6 +82,33 @@ class VideoUploadScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+               // 🎥 촬영 버튼
+                ElevatedButton.icon(
+                  onPressed: () {
+                    if (kIsWeb) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('웹에서는 실시간 촬영을 지원하지 않습니다.'),
+                        ),
+                      );
+                    } else {
+                      FileAdapter().openCamera(context, exercise);
+                    }
+                  },
+                  icon: const Icon(Icons.videocam, color: Colors.black),
+                  label: const Text(
+                      '실시간 촬영',
+                      style: TextStyle(color: Colors.black, fontSize: 20)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEAEAEA),
+                    minimumSize: const Size.fromHeight(60),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    elevation: 3,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 ElevatedButton.icon(
                   onPressed: () => _pickAndUpload(context, exercise),
                   icon: const Icon(Icons.upload_file, color: Colors.black),
