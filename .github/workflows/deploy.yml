@@ -44,6 +44,9 @@ jobs:
       - name: Extract short SHA
         id: meta
         run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+      
+      - name: Force clean build cache
+        run: docker builder prune -a -f || true
 
       - name: Build & Push (latest + sha)
         uses: docker/build-push-action@v6
