@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:body_log/util/token_helper.dart';
 const baseUrl = "http://13.125.219.3";
 class InbodyScreen extends StatefulWidget {
   const InbodyScreen({super.key});
@@ -37,7 +38,6 @@ class _InbodyScreenState extends State<InbodyScreen> {
 
   Future<void> fetchInbodyData() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
     if (token == null) return;
 
     final token = await TokenHelper.getToken();
