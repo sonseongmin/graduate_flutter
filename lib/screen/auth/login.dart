@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../UI/login_style.dart';
 import '../../../UI/input_field.dart';
-
+const baseUrl = 'http://13.125.219.3';
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -49,7 +49,7 @@ class LoginScreen extends StatelessWidget {
                       final password = pwController.text;
 
                       final response = await http.post(
-                        Uri.parse('/api/login'),
+                        Uri.parse('$baseUrl/api/login'),
                         headers: {'Content-Type': 'application/json'},
                         body: jsonEncode({'username': username, 'password': password}),
                       );
@@ -69,7 +69,7 @@ class LoginScreen extends StatelessWidget {
 
                         try {
                           final resp = await http.get(
-                            Uri.parse('/api/v1/inbody'),
+                            Uri.parse('$baseUrl/api/v1/inbody'),
                             headers: {'Authorization': 'Bearer $accessToken'},
                           );
 
