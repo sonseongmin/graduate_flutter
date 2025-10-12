@@ -18,7 +18,7 @@ class MobileFileAdapter {
 
     final req = http.MultipartRequest(
       'POST',
-      Uri.parse('http://10.0.2.2/api/v1/exercise/analyze'),
+      Uri.parse('http://13.125.219.3/api/v1/exercise/analyze'),
     );
 
     if (token != null && token.isNotEmpty) {

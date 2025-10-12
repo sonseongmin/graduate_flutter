@@ -23,8 +23,8 @@ class VideoUploadScreen extends StatelessWidget {
 
   String _baseHost() {
     // ✅ Platform 제거, kIsWeb만 유지
-    if (kIsWeb) return 'http://13.125.219.3';
-    return 'http://10.0.2.2'; // 모바일 (에뮬레이터)
+    //if (kIsWeb) return 'http://13.125.219.3';
+    return 'http://13.125.219.3'; // 모바일 (에뮬레이터)
   }
 
   // ============================================================
