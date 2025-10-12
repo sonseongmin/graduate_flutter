@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-const baseUrl = "http://13.125.219.3"
+const baseUrl = "http://13.125.219.3";
 class InbodyScreen extends StatefulWidget {
   const InbodyScreen({super.key});
 
