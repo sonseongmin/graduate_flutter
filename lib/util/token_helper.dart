@@ -10,7 +10,7 @@ class TokenHelper {
       html.window.localStorage['user_name'] = userName;
     } else {
       final prefs = await SharedPreferences.getInstance();
-        awai TokenHelper.saveToken(accessToken, userName);
+        await TokenHelper.saveToken(accessToken, userName);
     }
   }
 
