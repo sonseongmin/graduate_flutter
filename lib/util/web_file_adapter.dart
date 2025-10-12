@@ -9,13 +9,24 @@ class WebFileAdapter implements IFileAdapter {
   @override
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
     final token = await TokenHelper.getToken();
-    if (token == null) return;
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('⚠️ 로그인 토큰이 없습니다.')),
+      );
+      return;
+    }
 
     final input = html.FileUploadInputElement()..accept = 'video/*';
     input.click();
     await input.onChange.first;
+
     final file = input.files?.first;
-    if (file == null) return;
+    if (file == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('❌ 파일이 선택되지 않았습니다.')),
+      );
+      return;
+    }
 
     final form = html.FormData();
     form.appendBlob('file', file);
@@ -27,17 +38,17 @@ class WebFileAdapter implements IFileAdapter {
       ..onLoadEnd.listen((_) {
         if (req.status == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('✅ 업로드 성공!')),
+            const SnackBar(content: Text('✅ 업로드 성공')),
           );
         } else if (req.status == 0 && (req.responseText?.isEmpty ?? true)) {
           debugPrint('사용자가 파일 선택을 취소함');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
             SnackBar(content: Text('❌ 업로드 실패 (${req.status})')),
-          ),
-        );
-      });
+          );
+        }
+      }); // ✅ ← 중괄호 닫기 주의!
+
     req.send(form);
   }
 
