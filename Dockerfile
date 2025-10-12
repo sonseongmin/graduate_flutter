@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Flutter SDK 설치 (3.22.2 고정)
+RUN rm -rf /usr/local/flutter
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter -b 3.24.3
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
