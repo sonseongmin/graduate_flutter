@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
-// ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'stub_adapter.dart';
-import 'file_adapter.dart';
+import 'token_helper.dart';
 
-class BaseFileAdapter implements BaseFileAdapter {
+IFileAdapter createFileAdapter() => WebFileAdapter();
+
+class WebFileAdapter implements IFileAdapter {
   @override
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
-    final token = await getAccessToken();
-    if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인이 필요합니다.')),
-      );
-      return;
-    }
+    final token = await TokenHelper.getToken();
+    if (token == null) return;
 
     final input = html.FileUploadInputElement()..accept = 'video/*';
     input.click();
@@ -21,23 +17,23 @@ class BaseFileAdapter implements BaseFileAdapter {
     final file = input.files?.first;
     if (file == null) return;
 
-    final formData = html.FormData();
-    formData.appendBlob('file', file);
+    final form = html.FormData();
+    form.appendBlob('file', file);
 
-    final request = html.HttpRequest();
-    request
+    final req = html.HttpRequest();
+    req
       ..open('POST', 'http://13.125.219.3/api/v1/exercise/analyze')
       ..setRequestHeader('Authorization', 'Bearer $token')
       ..onLoadEnd.listen((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(request.status == 200
+            content: Text(req.status == 200
                 ? '✅ 업로드 성공!'
-                : '❌ 실패: ${request.status}'),
+                : '❌ 업로드 실패 (${req.status})'),
           ),
         );
       });
-    request.send(formData);
+    req.send(form);
   }
 
   @override
