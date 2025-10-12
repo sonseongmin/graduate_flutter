@@ -15,9 +15,17 @@ import 'stub_adapter.dart' if (dart.library.io) 'mobile_file_adapter.dart';
 final IFileAdapter _impl = createFileAdapter();
 
 class FileAdapter {
-  static Future<void> pickAndUpload(BuildContext context, String exercise) =>
+  // ✅ 인스턴스 메서드 버전
+  Future<void> pickAndUpload(BuildContext context, String exercise) =>
       _impl.pickAndUpload(context, exercise);
 
-  static Future<void> openCamera(BuildContext context, String exercise) =>
+  Future<void> openCamera(BuildContext context, String exercise) =>
+      _impl.openCamera(context, exercise);
+
+  // ✅ 필요하면 static 버전도 병행 가능
+  static Future<void> pick(BuildContext context, String exercise) =>
+      _impl.pickAndUpload(context, exercise);
+
+  static Future<void> camera(BuildContext context, String exercise) =>
       _impl.openCamera(context, exercise);
 }
