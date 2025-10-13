@@ -10,18 +10,20 @@ RUN apt-get update && apt-get install -y \
 RUN rm -rf /usr/local/flutter
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
 WORKDIR /usr/local/flutter
-# ✅ 태그 강제 적용 (fetch 후 태그 기준 checkout)
+
+# ✅ 태그 기반 버전 고정
 RUN git fetch --all --tags
 RUN git checkout tags/3.27.1 -b stable-3.27.1
-RUN flutter precache --universal  
 
-# ✅ 환경 변수 설정
+# ✅ 환경 변수 설정 (flutter 명령 인식되도록)
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
-# ✅ 버전 확인 (로그에서 반드시 Dart 3.7.x 확인)
+# ✅ flutter 캐시 준비 및 버전 확인
+RUN flutter precache --universal
 RUN flutter --version
 RUN dart --version
 
+# --- 앱 디렉토리 이동 ---
 WORKDIR /app
 
 # --- Flutter Web 활성화 ---
