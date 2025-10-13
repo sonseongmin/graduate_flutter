@@ -21,4 +21,3 @@ class TokenHelper {
     return const String.fromEnvironment('ACCESS_TOKEN', defaultValue: '');
   }
 }
-IFileAdapter createFileAdapter() => StubFileAdapter();

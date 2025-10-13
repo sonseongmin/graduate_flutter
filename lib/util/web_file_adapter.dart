@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
 import 'token_helper.dart';
-import 'file_adapter.dart'; // ✅ 추가해야 IFileAdapter 인식됨
+import 'file_adapter.dart'; // ✅ import 해야 IFileAdapter 인식됨
 
 class WebFileAdapter implements IFileAdapter {
   @override
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
     final input = html.FileUploadInputElement()..accept = 'video/*';
     input.click();
+
     input.onChange.listen((event) async {
       final file = input.files?.first;
       if (file == null) {

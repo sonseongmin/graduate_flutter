@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'file_adapter.dart'; // ✅ 이걸 꼭 넣어야 IFileAdapter 인식됨
+import 'file_adapter.dart'; // ✅ IFileAdapter 타입을 사용하므로 반드시 import 필요
 
 class StubFileAdapter implements IFileAdapter {
   @override
