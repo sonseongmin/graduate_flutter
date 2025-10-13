@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 RUN rm -rf /usr/local/flutter
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
 WORKDIR /usr/local/flutter
-RUN git checkout 3.24.3   
+RUN git checkout 3.27.1   
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 RUN flutter --version
