@@ -98,3 +98,4 @@ class MobileFileAdapter implements IFileAdapter {
     }
   }
 }
+IFileAdapter createFileAdapter() => MobileFileAdapter();

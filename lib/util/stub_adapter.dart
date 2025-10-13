@@ -22,3 +22,4 @@ class StubFileAdapter implements IFileAdapter {
     );
   }
 }
+IFileAdapter createFileAdapter() => StubFileAdapter();

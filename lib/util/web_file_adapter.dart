@@ -50,3 +50,4 @@ class WebFileAdapter {
     });
   }
 }
+IFileAdapter createFileAdapter() => WebFileAdapter();
