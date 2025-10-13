@@ -4,24 +4,25 @@ import 'token_helper.dart';
 
 class WebFileAdapter {
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
-    final token = await TokenHelper.getToken();
-    if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.')),
-      );
-      return;
-    }
-
-    // ✅ 파일 선택창 생성
+    // ✅ 먼저 업로드 창을 띄운다 (동기적으로)
     final input = html.FileUploadInputElement()..accept = 'video/*';
     input.click();
 
-    // ✅ change 이벤트 리스너 내부에서 처리
-    input.onChange.listen((event) {
+    // ✅ change 이벤트 리스너 내부에서 토큰 체크 + 업로드
+    input.onChange.listen((event) async {
       final file = input.files?.first;
       if (file == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('❌ 파일이 선택되지 않았습니다.')),
+        );
+        return;
+      }
+
+      // ✅ 이제 비동기 호출 (이제는 사용자가 직접 클릭했으니 안전)
+      final token = await TokenHelper.getToken();
+      if (token == null || token.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.')),
         );
         return;
       }
@@ -48,10 +49,3 @@ class WebFileAdapter {
       req.send(form);
     });
   }
-
-  Future<void> openCamera(BuildContext context, String exercise) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('웹에서는 카메라 촬영이 지원되지 않습니다.')),
-    );
-  }
-}
