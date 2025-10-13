@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
 import 'token_helper.dart';
+import 'file_adapter.dart'; // ✅ 추가해야 IFileAdapter 인식됨
 
-class WebFileAdapter {
+class WebFileAdapter implements IFileAdapter {
+  @override
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
-    // ✅ 먼저 업로드 창을 띄운다 (동기적으로)
     final input = html.FileUploadInputElement()..accept = 'video/*';
     input.click();
-
-    // ✅ change 이벤트 리스너 내부에서 토큰 체크 + 업로드
     input.onChange.listen((event) async {
       final file = input.files?.first;
       if (file == null) {
@@ -18,7 +17,6 @@ class WebFileAdapter {
         return;
       }
 
-      // ✅ 이제 비동기 호출 (이제는 사용자가 직접 클릭했으니 안전)
       final token = await TokenHelper.getToken();
       if (token == null || token.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -45,9 +43,16 @@ class WebFileAdapter {
             );
           }
         });
-
       req.send(form);
     });
   }
+
+  @override
+  Future<void> openCamera(BuildContext context, String exercise) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('웹에서는 카메라 촬영이 지원되지 않습니다.')),
+    );
+  }
 }
+
 IFileAdapter createFileAdapter() => WebFileAdapter();
