@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
 import 'token_helper.dart';
-import 'file_adapter.dart'; // ✅ import 해야 IFileAdapter 인식됨
+import 'file_adapter.dart';
+
+// ✅ dart:html import — 웹 전용
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 
 class WebFileAdapter implements IFileAdapter {
   @override
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
+    final token = await TokenHelper.getToken();
+    if (token == null || token.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.')),
+      );
+      return;
+    }
+
+    // ✅ 파일 선택창 생성
     final input = html.FileUploadInputElement()..accept = 'video/*';
     input.click();
 
-    input.onChange.listen((event) async {
+    input.onChange.listen((_) {
       final file = input.files?.first;
       if (file == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('❌ 파일이 선택되지 않았습니다.')),
-        );
-        return;
-      }
-
-      final token = await TokenHelper.getToken();
-      if (token == null || token.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.')),
         );
         return;
       }
@@ -44,6 +48,7 @@ class WebFileAdapter implements IFileAdapter {
             );
           }
         });
+
       req.send(form);
     });
   }
@@ -51,9 +56,10 @@ class WebFileAdapter implements IFileAdapter {
   @override
   Future<void> openCamera(BuildContext context, String exercise) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('웹에서는 카메라 촬영이 지원되지 않습니다.')),
+      const SnackBar(content: Text('📷 웹에서는 카메라 촬영이 지원되지 않습니다.')),
     );
   }
 }
 
+// ✅ 플랫폼별 팩토리 함수
 IFileAdapter createFileAdapter() => WebFileAdapter();
