@@ -13,9 +13,9 @@ WORKDIR /usr/local/flutter
 # ✅ 태그 강제 적용 (fetch 후 태그 기준 checkout)
 RUN git fetch --all --tags
 RUN git checkout tags/3.27.1 -b stable-3.27.1
-RUN flutter precache --universal  # ✅ 캐시 초기화 (버전 갱신 반영용)
+RUN flutter precache --universal  
 
-# ✅ 환경 변수 설정a
+# ✅ 환경 변수 설정
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # ✅ 버전 확인 (로그에서 반드시 Dart 3.7.x 확인)
