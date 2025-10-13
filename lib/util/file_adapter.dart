@@ -1,4 +1,3 @@
-// lib/util/file_adapter.dart
 import 'package:flutter/material.dart';
 import 'stub_adapter.dart'
     if (dart.library.io) 'mobile_file_adapter.dart'
@@ -10,18 +9,16 @@ abstract class IFileAdapter {
   Future<void> openCamera(BuildContext context, String exercise);
 }
 
-/// 플랫폼별 구현 팩토리 선언 (클래스 밖 전역)
-IFileAdapter createFileAdapter(); // ✅ 여기 세미콜론으로 끝내야 함
+/// 플랫폼별 구현체 주입
+IFileAdapter createFileAdapter() => FileAdapterImpl();
 
-final IFileAdapter _adapter = createFileAdapter();
+final IFileAdapter _impl = createFileAdapter();
 
-/// FileAdapter 진입점
+/// 퍼사드 클래스 (외부에서 이걸 사용)
 class FileAdapter {
-  Future<void> pickAndUpload(BuildContext context, String exercise) async {
-    await _adapter.pickAndUpload(context, exercise);
-  }
+  Future<void> pickAndUpload(BuildContext context, String exercise) =>
+      _impl.pickAndUpload(context, exercise);
 
-  Future<void> openCamera(BuildContext context, String exercise) async {
-    await _adapter.openCamera(context, exercise);
-  }
+  Future<void> openCamera(BuildContext context, String exercise) =>
+      _impl.openCamera(context, exercise);
 }

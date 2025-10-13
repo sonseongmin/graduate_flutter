@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:html' as html;
 import 'token_helper.dart';
 import 'file_adapter.dart';
 
-// ✅ dart:html import — 웹 전용
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
-
-class WebFileAdapter implements IFileAdapter {
+class FileAdapterImpl implements IFileAdapter {
   @override
   Future<void> pickAndUpload(BuildContext context, String exercise) async {
     final token = await TokenHelper.getToken();
@@ -17,11 +14,11 @@ class WebFileAdapter implements IFileAdapter {
       return;
     }
 
-    // ✅ 파일 선택창 생성
+    // ✅ 파일 업로드 창 생성
     final input = html.FileUploadInputElement()..accept = 'video/*';
     input.click();
 
-    input.onChange.listen((_) {
+    input.onChange.listen((event) {
       final file = input.files?.first;
       if (file == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -31,7 +28,7 @@ class WebFileAdapter implements IFileAdapter {
       }
 
       final form = html.FormData();
-      form.appendBlob('file', file);
+      form.appendBlob('file', file, file.name);
 
       final req = html.HttpRequest();
       req
@@ -60,6 +57,3 @@ class WebFileAdapter implements IFileAdapter {
     );
   }
 }
-
-// ✅ 플랫폼별 팩토리 함수
-IFileAdapter createFileAdapter() => WebFileAdapter();
