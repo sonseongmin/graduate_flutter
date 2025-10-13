@@ -1,33 +1,27 @@
+// lib/util/file_adapter.dart
 import 'package:flutter/material.dart';
-
-// ✅ 조건부 import (환경별)
 import 'stub_adapter.dart'
     if (dart.library.io) 'mobile_file_adapter.dart'
     if (dart.library.html) 'web_file_adapter.dart';
 
-// ✅ 인터페이스 정의
+/// 공통 인터페이스
 abstract class IFileAdapter {
   Future<void> pickAndUpload(BuildContext context, String exercise);
   Future<void> openCamera(BuildContext context, String exercise);
 }
 
-// ✅ 플랫폼별 구현 선택 (세미콜론만, 절대 바디 넣지 말 것!)
-IFileAdapter createFileAdapter();
+/// 플랫폼별 구현 팩토리 선언 (클래스 밖 전역)
+IFileAdapter createFileAdapter(); // ✅ 여기 세미콜론으로 끝내야 함
 
-// ✅ 실제 인스턴스 생성
-final IFileAdapter _impl = createFileAdapter();
+final IFileAdapter _adapter = createFileAdapter();
 
+/// FileAdapter 진입점
 class FileAdapter {
-  Future<void> pickAndUpload(BuildContext context, String exercise) =>
-      _impl.pickAndUpload(context, exercise);
+  Future<void> pickAndUpload(BuildContext context, String exercise) async {
+    await _adapter.pickAndUpload(context, exercise);
+  }
 
-  Future<void> openCamera(BuildContext context, String exercise) =>
-      _impl.openCamera(context, exercise);
-
-  // static 버전도 병행 가능 (필요 시)
-  static Future<void> pick(BuildContext context, String exercise) =>
-      _impl.pickAndUpload(context, exercise);
-
-  static Future<void> camera(BuildContext context, String exercise) =>
-      _impl.openCamera(context, exercise);
+  Future<void> openCamera(BuildContext context, String exercise) async {
+    await _adapter.openCamera(context, exercise);
+  }
 }
