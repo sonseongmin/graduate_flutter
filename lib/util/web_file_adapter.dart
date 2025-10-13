@@ -49,3 +49,4 @@ class WebFileAdapter {
       req.send(form);
     });
   }
+}
