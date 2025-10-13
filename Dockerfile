@@ -46,7 +46,7 @@ COPY . .
 
 # --- 정리 및 빌드 ---
 RUN flutter clean
-RUN flutter build web --release --no-tree-shake-icons --web-renderer canvaskit -v
+RUN flutter build web --release --no-tree-shake-icons -v
 
 
 # ===== 2) Runtime Stage: Nginx =====
