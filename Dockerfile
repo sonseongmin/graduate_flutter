@@ -10,7 +10,10 @@ RUN apt-get update && apt-get install -y \
 RUN rm -rf /usr/local/flutter
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
 WORKDIR /usr/local/flutter
-RUN git checkout 3.27.1   
+# ✅ 원격 브랜치 전체 가져온 다음
+RUN git fetch --all --tags
+# ✅ 태그 기반으로 정확히 고정
+RUN git checkout tags/3.27.1 -b stable-3.27.1  
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 RUN flutter --version
