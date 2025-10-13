@@ -6,35 +6,37 @@ RUN apt-get update && apt-get install -y \
     curl unzip git xz-utils zip libglu1-mesa wget ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# --- Flutter SDK 설치 (안정 버전 고정) ---
+# --- Flutter SDK 설치 (3.27.1 강제 고정) ---
 RUN rm -rf /usr/local/flutter
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
 WORKDIR /usr/local/flutter
-# ✅ 원격 브랜치 전체 가져온 다음
+# ✅ 태그 강제 적용 (fetch 후 태그 기준 checkout)
 RUN git fetch --all --tags
-# ✅ 태그 기반으로 정확히 고정
-RUN git checkout tags/3.27.1 -b stable-3.27.1  
+RUN git checkout tags/3.27.1 -b stable-3.27.1
+RUN flutter precache --universal  # ✅ 캐시 초기화 (버전 갱신 반영용)
+
+# ✅ 환경 변수 설정a
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
+# ✅ 버전 확인 (로그에서 반드시 Dart 3.7.x 확인)
 RUN flutter --version
 RUN dart --version
 
 WORKDIR /app
 
-# --- Web 활성화 ---
+# --- Flutter Web 활성화 ---
 RUN flutter config --enable-web
 
-# --- 의존성 설치 ---
+# --- pubspec 의존성 설치 ---
 COPY pubspec.* ./
 RUN flutter pub get
 
-# --- 앱 복사 ---
+# --- 나머지 앱 복사 ---
 COPY . .
 
 # --- 정리 및 빌드 ---
 RUN flutter clean
-RUN flutter build web --release --no-tree-shake-icons --no-wasm-dry-run --web-renderer canvaskit -v
-
+RUN flutter build web --release --no-tree-shake-icons --web-renderer canvaskit -v
 
 # ===== 2) Runtime Stage: Nginx =====
 FROM nginx:alpine
