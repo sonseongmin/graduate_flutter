@@ -8,7 +8,7 @@ import '../../../util/token_helper.dart';
 class TodayWorkoutScreen extends StatefulWidget {
   final String name;
   final int? count;
-  final int calories;
+  final double calories;
   final int accuracy;
   final String date;
 

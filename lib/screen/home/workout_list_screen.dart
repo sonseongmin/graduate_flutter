@@ -11,31 +11,34 @@ class WorkoutListScreen extends StatelessWidget {
     required this.workouts,
   });
 
+  // ✅ 영어 → 한글 + 이미지 매핑
+  final Map<String, Map<String, String>> exerciseMap = {
+    'pushup': {'name': '푸쉬업', 'image': 'assets/pushup.png'},
+    'pullup': {'name': '풀업', 'image': 'assets/pullup.png'},
+    'squat': {'name': '스쿼트', 'image': 'assets/squat.png'},
+    'jumpingjack': {'name': '점핑잭', 'image': 'assets/jumping_jack.png'},
+  };
+
+  // ✅ 한글 이름 변환
+  String getExerciseName(String exercise) {
+    return exerciseMap[exercise.toLowerCase()]?['name'] ?? exercise;
+  }
+
+  // ✅ 이미지 경로 변환
   String getImagePath(String exercise) {
-    switch (exercise) {
-      case '스쿼트':
-        return 'assets/squat.png';
-      case '푸쉬업':
-        return 'assets/pushup.png';
-      case '풀업':
-        return 'assets/pullup.png';
-      case '점핑잭':
-        return 'assets/jumping_jack.png';
-      default:
-        return 'assets/default.png';
-    }
+    return exerciseMap[exercise.toLowerCase()]?['image'] ?? 'assets/default.png';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF20221E), // 배경색
+      backgroundColor: const Color(0xFF20221E),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          '오늘의 운동',
+          '운동 목록',
           style: TextStyle(color: Colors.white, fontFamily: 'Gamwulchi'),
         ),
         leading: IconButton(
@@ -49,7 +52,8 @@ class WorkoutListScreen extends StatelessWidget {
           itemCount: workouts.length,
           itemBuilder: (context, index) {
             final workout = workouts[index];
-            final imagePath = getImagePath(workout['name']);
+            final displayName = getExerciseName(workout['name']); // ✅ 한글로 변환
+            final imagePath = getImagePath(workout['name']); // ✅ 이미지도 자동 매칭
             final int? rawCount = workout['count'] as int?;
             final String countLabel = (rawCount != null ? '${rawCount}회' : '-');
 
@@ -59,9 +63,11 @@ class WorkoutListScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => TodayWorkoutScreen(
-                      name: workout['name'] as String,
+                      name: displayName, // ✅ 한글 이름으로 넘김
                       count: rawCount,
-                      calories: workout['calories'] as int,
+                      calories: workout['calories'] is int
+                          ? workout['calories'] as int
+                          : (workout['calories'] as double).toInt(),
                       accuracy: ((workout['accuracy'] as double) * 100).toInt(),
                       date: date,
                     ),
@@ -72,7 +78,7 @@ class WorkoutListScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEAEAEA), // 박스 색
+                  color: const Color(0xFFEAEAEA),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -84,7 +90,7 @@ class WorkoutListScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${workout['name']} $countLabel',
+                            '$displayName $countLabel',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
