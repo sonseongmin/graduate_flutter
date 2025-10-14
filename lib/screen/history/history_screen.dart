@@ -50,24 +50,39 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        setState(() {
-          allData = data.map((item) {
-            final date = DateFormat('yyyy.MM.dd').format(
-              DateTime.parse(item['ended_at']),
-            );
+      setState(() {
+        allData = data.map((item) {
+          final rawDate = item['ended_at'];
+          DateTime parsedDate;
 
-            return {
-              'date': date,
-              'name': item['exercise_type'] ?? 'Unknown',
-              'count': item['rep_count'] ?? 0,
-              'calories': (item['calories'] ?? 0).toDouble(),
-              'time': 10, // 🕒 서버에서 운동 시간 필드 추가되면 교체
-              'accuracy': ((item['avg_accuracy'] ?? 0) / 100.0).toDouble(),
-            };
-          }).toList();
+          if (rawDate == null || rawDate.toString().trim().isEmpty) {
+            parsedDate = DateTime.now();
+          } else {
+            try {
+              parsedDate = DateTime.parse(rawDate);
+            } catch (_) {
+              try {
+                parsedDate = DateFormat('yyyy.MM.dd').parse(rawDate);
+              } catch (_) {
+                parsedDate = DateTime.now();
+              }
+            }
+          }
 
-          isLoading = false;
-        });
+          final date = DateFormat('yyyy.MM.dd').format(parsedDate);
+
+          return {
+            'date': date,
+            'name': item['exercise_type'] ?? 'Unknown',
+            'count': item['rep_count'] ?? 0,
+            'calories': (item['calories'] ?? 0).toDouble(),
+            'time': 10,
+            'accuracy': ((item['avg_accuracy'] ?? 0) / 100.0).toDouble(),
+          };
+        }).toList();
+
+        isLoading = false;
+      });
 
         debugPrint("✅ 운동 기록 ${allData.length}개 불러옴");
       } else {
