@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // JWT 저장용
+import '../../../util/token_helper.dart';
 
 class TodayWorkoutScreen extends StatefulWidget {
   final String name;
@@ -30,9 +31,8 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
 
   // ✅ JWT 토큰 불러오기
   Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token');
-  }
+    return await TokenHelper.getToken(); // ✅ 여기만 수정
+    }
 
   // ✅ 운동 결과 저장 API 호출
   Future<void> saveWorkout() async {
