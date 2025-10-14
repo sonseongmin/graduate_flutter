@@ -54,7 +54,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
       "ended_at": now.toIso8601String(),
       "rep_count": widget.count ?? 0,
       "avg_accuracy": widget.accuracy,
-      "caloires" :widget.calories
+      "calories" :widget.calories
     });
 
     try {
