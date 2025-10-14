@@ -11,8 +11,8 @@ class WorkoutListScreen extends StatelessWidget {
     required this.workouts,
   });
 
-  // ✅ 영어 → 한글 + 이미지 매핑
-  final Map<String, Map<String, String>> exerciseMap = {
+  // ✅ 영어 → 한글 + 이미지 매핑 (static const로 선언)
+  static const Map<String, Map<String, String>> exerciseMap = {
     'pushup': {'name': '푸쉬업', 'image': 'assets/pushup.png'},
     'pullup': {'name': '풀업', 'image': 'assets/pullup.png'},
     'squat': {'name': '스쿼트', 'image': 'assets/squat.png'},
@@ -52,10 +52,14 @@ class WorkoutListScreen extends StatelessWidget {
           itemCount: workouts.length,
           itemBuilder: (context, index) {
             final workout = workouts[index];
-            final displayName = getExerciseName(workout['name']); // ✅ 한글로 변환
-            final imagePath = getImagePath(workout['name']); // ✅ 이미지도 자동 매칭
+            final displayName = getExerciseName(workout['name']);
+            final imagePath = getImagePath(workout['name']);
             final int? rawCount = workout['count'] as int?;
             final String countLabel = (rawCount != null ? '${rawCount}회' : '-');
+
+            // ✅ double로 변환
+            final double calories =
+                (workout['calories'] is num) ? (workout['calories'] as num).toDouble() : 0.0;
 
             return GestureDetector(
               onTap: () {
@@ -63,11 +67,9 @@ class WorkoutListScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => TodayWorkoutScreen(
-                      name: displayName, // ✅ 한글 이름으로 넘김
+                      name: displayName,
                       count: rawCount,
-                      calories: workout['calories'] is int
-                          ? workout['calories'] as int
-                          : (workout['calories'] as double).toInt(),
+                      calories: calories,
                       accuracy: ((workout['accuracy'] as double) * 100).toInt(),
                       date: date,
                     ),
@@ -96,7 +98,7 @@ class WorkoutListScreen extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text('🔥 칼로리 소모: ${workout['calories']}kcal'),
+                          Text('🔥 칼로리 소모: ${calories.toStringAsFixed(2)} kcal'),
                         ],
                       ),
                     ),
