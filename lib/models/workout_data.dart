@@ -1,7 +1,7 @@
 class WorkoutData {
   final String name;
   final int count;
-  final int calories;
+  final double calories;
   final int time;
   final int accuracy;
   final List<String> issues;
