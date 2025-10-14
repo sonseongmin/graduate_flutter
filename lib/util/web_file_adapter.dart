@@ -32,7 +32,7 @@ class FileAdapterImpl implements IFileAdapter {
 
       final req = html.HttpRequest();
       req
-        ..open('POST', 'http://13.125.219.3/api/v1/exercise/analyze')
+        ..open('POST', 'http://13.125.219.3/ai/api/v1/exercise/analyze')
         ..setRequestHeader('Authorization', 'Bearer $token')
         ..onLoadEnd.listen((_) {
           if (req.status == 200) {
