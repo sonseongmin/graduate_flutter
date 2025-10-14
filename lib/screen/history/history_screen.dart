@@ -37,7 +37,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
 
       // ⚙️ 실제 서버 주소로 교체
-      final url = Uri.parse('http://13.125.208.240/api/v1/workouts');
+      final url = Uri.parse('/api/v1/workouts');
 
       final response = await http.get(
         url,
@@ -46,7 +46,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           'Content-Type': 'application/json',
         },
       );
-
+      debugPrint("🔥 현재 토큰: $token");
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
