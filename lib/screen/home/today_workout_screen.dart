@@ -3,7 +3,6 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // JWT 저장용
 import '../../../util/token_helper.dart';
 
 class TodayWorkoutScreen extends StatefulWidget {
@@ -29,16 +28,34 @@ class TodayWorkoutScreen extends StatefulWidget {
 class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
   bool _isLoading = false;
 
+  // ✅ 운동 이름 + 이미지 매핑
+  final Map<String, Map<String, String>> exerciseMap = {
+    'pushup': {'name': '푸쉬업', 'image': 'assets/pushup.png'},
+    'pullup': {'name': '풀업', 'image': 'assets/pullup.png'},
+    'squat': {'name': '스쿼트', 'image': 'assets/squat.png'},
+    'jumpingjack': {'name': '점핑잭', 'image': 'assets/jumping_jack.png'},
+  };
+
+  // ✅ 한글 이름 가져오기
+  String getExerciseName(String exercise) {
+    return exerciseMap[exercise.toLowerCase()]?['name'] ?? exercise;
+  }
+
+  // ✅ 이미지 경로 가져오기
+  String getImagePath(String exercise) {
+    return exerciseMap[exercise.toLowerCase()]?['image'] ?? 'assets/default.png';
+  }
+
   // ✅ JWT 토큰 불러오기
   Future<String?> getToken() async {
-    return await TokenHelper.getToken(); // ✅ 여기만 수정
-    }
+    return await TokenHelper.getToken();
+  }
 
   // ✅ 운동 결과 저장 API 호출
   Future<void> saveWorkout() async {
     setState(() => _isLoading = true);
 
-    final url = Uri.parse('http://13.125.208.240/api/v1/workouts'); // 🔥 실제 서버 주소로 변경
+    final url = Uri.parse('http://13.125.208.240/api/v1/workouts');
     final token = await getToken();
 
     if (token == null) {
@@ -54,7 +71,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
       "ended_at": now.toIso8601String(),
       "rep_count": widget.count ?? 0,
       "avg_accuracy": widget.accuracy,
-      "calories" :widget.calories
+      "calories": widget.calories
     });
 
     try {
@@ -69,7 +86,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Fluttertoast.showToast(msg: "✅ 운동 기록이 저장되었습니다!");
-        Navigator.pushNamed(context, '/history'); // 기록 페이지로 이동
+        Navigator.pushNamed(context, '/history');
       } else {
         print("응답 바디: ${response.body}");
         Fluttertoast.showToast(
@@ -84,22 +101,6 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
     }
   }
 
-  // ✅ 운동 이미지 선택
-  String getImagePath(String exercise) {
-    switch (exercise) {
-      case 'squat':
-        return 'assets/squat.png';
-      case 'pullup':
-        return 'assets/pullup.png';
-      case 'pushup':
-        return 'assets/pushup.png';
-      case 'jumpingjack':
-        return 'assets/jumping_jack.png';
-      default:
-        return 'assets/default.png';
-    }
-  }
-
   String _countLabel() {
     if (widget.count == null) return '-';
     return '${widget.count}회';
@@ -108,6 +109,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
   @override
   Widget build(BuildContext context) {
     final imagePath = getImagePath(widget.name);
+    final displayName = getExerciseName(widget.name);
     final percent = (widget.accuracy.clamp(0, 100)) / 100.0;
 
     return Scaffold(
@@ -157,7 +159,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              // 상단 요약 카드
+              // ✅ 상단 요약 카드
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -175,7 +177,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${widget.name} ${_countLabel()}',
+                            '$displayName ${_countLabel()}',
                             style: const TextStyle(
                               fontSize: 24,
                               fontFamily: 'Gamwulchi',
@@ -190,7 +192,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
                 ),
               ),
 
-              // 분석 카드
+              // ✅ 분석 카드
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -203,7 +205,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${widget.name} 분석 결과',
+                        '$displayName 분석 결과',
                         style: const TextStyle(
                           fontSize: 24,
                           fontFamily: 'Gamwulchi',
@@ -217,7 +219,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('${widget.name} ${_countLabel()}'),
+                                Text('$displayName ${_countLabel()}'),
                                 Text('칼로리 소모: ${widget.calories} kcal'),
                               ],
                             ),
