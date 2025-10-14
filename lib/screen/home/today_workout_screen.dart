@@ -38,7 +38,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
   Future<void> saveWorkout() async {
     setState(() => _isLoading = true);
 
-    final url = Uri.parse('http://13.125.208.240/workouts'); // 🔥 실제 서버 주소로 변경
+    final url = Uri.parse('http://13.125.208.240/api/v1/workouts'); // 🔥 실제 서버 주소로 변경
     final token = await getToken();
 
     if (token == null) {
