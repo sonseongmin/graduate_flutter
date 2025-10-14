@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../UI/login_style.dart';
 import '../../../UI/input_field.dart';
+import '../../../util/token_helper.dart'; // ✅ 추가
+
 const baseUrl = 'http://13.125.219.3';
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -48,6 +50,13 @@ class LoginScreen extends StatelessWidget {
                       final username = idController.text.trim();
                       final password = pwController.text;
 
+                      if (username.isEmpty || password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('아이디와 비밀번호를 입력해주세요.')),
+                        );
+                        return;
+                      }
+
                       final response = await http.post(
                         Uri.parse('$baseUrl/api/login'),
                         headers: {'Content-Type': 'application/json'},
@@ -59,11 +68,14 @@ class LoginScreen extends StatelessWidget {
                         final accessToken = data['access_token'];
                         final userName = data['name']?.toString() ?? '';
 
-                        final prefs = await SharedPreferences.getInstance();
+                        // ✅ TokenHelper로 통합 관리 (FlutterSecureStorage + 캐시)
+                        await TokenHelper.saveToken(accessToken);
 
-                        await prefs.setString('access_token', accessToken);
+                        // ✅ SharedPreferences는 부가 데이터만 저장
+                        final prefs = await SharedPreferences.getInstance();
                         await prefs.setString('user_name', userName);
 
+                        // 기존 인바디 데이터 초기화
                         await prefs.remove('inbody_sex');
                         await prefs.remove('inbody_birth');
 
@@ -78,7 +90,7 @@ class LoginScreen extends StatelessWidget {
                             final sexApi = (d['sex'] as String?)?.toLowerCase();
                             final birthApi = d['birth_date']?.toString();
 
-                            // 서버 표기 → 로컬 표기
+                            // 서버 표기 → 로컬 표기 변환
                             final sexLocal = sexApi == 'male'
                                 ? '남'
                                 : (sexApi == 'female' ? '여' : null);
@@ -106,6 +118,9 @@ class LoginScreen extends StatelessWidget {
                           await prefs.remove('inbody_birth');
                         }
 
+                        // ✅ 저장 안정화를 위한 짧은 대기 (쓰기 완료 보장)
+                        await Future.delayed(const Duration(milliseconds: 300));
+
                         // 홈으로 이동
                         // ignore: use_build_context_synchronously
                         Navigator.pushReplacementNamed(context, '/home');
@@ -128,7 +143,6 @@ class LoginScreen extends StatelessWidget {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      // ✅ 버튼 색상 (회색)
                       backgroundColor: const Color(0xFF4E4E4E),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
