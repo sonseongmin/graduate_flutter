@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // JWT 저장용
 
 class TodayWorkoutScreen extends StatefulWidget {
   final String name;
@@ -22,15 +26,73 @@ class TodayWorkoutScreen extends StatefulWidget {
 }
 
 class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
+  bool _isLoading = false;
+
+  // ✅ JWT 토큰 불러오기
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  // ✅ 운동 결과 저장 API 호출
+  Future<void> saveWorkout() async {
+    setState(() => _isLoading = true);
+
+    final url = Uri.parse('http://<서버주소>/workouts'); // 🔥 실제 서버 주소로 변경
+    final token = await getToken();
+
+    if (token == null) {
+      Fluttertoast.showToast(msg: "로그인이 필요합니다.");
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    final now = DateTime.now();
+    final body = jsonEncode({
+      "exercise_type": widget.name,
+      "started_at": now.subtract(const Duration(minutes: 10)).toIso8601String(),
+      "ended_at": now.toIso8601String(),
+      "rep_count": widget.count ?? 0,
+      "avg_accuracy": widget.accuracy
+    });
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Fluttertoast.showToast(msg: "✅ 운동 기록이 저장되었습니다!");
+        Navigator.pushNamed(context, '/history'); // 기록 페이지로 이동
+      } else {
+        print("응답 바디: ${response.body}");
+        Fluttertoast.showToast(
+          msg: "저장 실패 (${response.statusCode})",
+          backgroundColor: Colors.redAccent,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: "네트워크 오류: $e");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // ✅ 운동 이미지 선택
   String getImagePath(String exercise) {
     switch (exercise) {
-      case '스쿼트':
+      case 'squat':
         return 'assets/squat.png';
-      case '풀업':
+      case 'pullup':
         return 'assets/pullup.png';
-      case '푸쉬업':
+      case 'pushup':
         return 'assets/pushup.png';
-      case '점핑잭':
+      case 'jumpingjack':
         return 'assets/jumping_jack.png';
       default:
         return 'assets/default.png';
@@ -163,8 +225,10 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
                             radius: 35.0,
                             lineWidth: 6.0,
                             percent: percent,
-                            center: Text('${widget.accuracy}%',
-                                style: const TextStyle(fontWeight: FontWeight.bold)),
+                            center: Text(
+                              '${widget.accuracy}%',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
                             progressColor: const Color(0xFF20221E),
                             backgroundColor: Colors.grey.shade300,
                           ),
@@ -174,18 +238,20 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
                       ),
                       const SizedBox(height: 16),
                       Center(
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4E4E4E),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 32),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                          ),
-                          child: const Text('저장하기',
-                              style: TextStyle(color: Colors.white)),
-                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(color: Colors.black)
+                            : ElevatedButton(
+                                onPressed: saveWorkout,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF4E4E4E),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 32),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30)),
+                                ),
+                                child: const Text('저장하기',
+                                    style: TextStyle(color: Colors.white)),
+                              ),
                       ),
                     ],
                   ),
