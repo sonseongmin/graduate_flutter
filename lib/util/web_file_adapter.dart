@@ -1,53 +1,54 @@
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
+import 'dart:convert';
+import 'dart:async';
 import 'token_helper.dart';
 import 'file_adapter.dart';
 
 class FileAdapterImpl implements IFileAdapter {
   @override
-  Future<void> pickAndUpload(BuildContext context, String exercise) async {
+  Future<Map<String, dynamic>> pickAndUpload(BuildContext context, String exercise) async {
     final token = await TokenHelper.getToken();
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.')),
       );
-      return;
+      throw Exception("토큰 없음");
     }
 
     // ✅ 파일 업로드 창 생성
     final input = html.FileUploadInputElement()..accept = 'video/*';
     input.click();
 
-    input.onChange.listen((event) {
-      final file = input.files?.first;
-      if (file == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('❌ 파일이 선택되지 않았습니다.')),
-        );
-        return;
-      }
+    await input.onChange.first;
+    final file = input.files?.first;
+    if (file == null) throw Exception("파일이 선택되지 않았습니다.");
 
-      final form = html.FormData();
-      form.appendBlob('file', file, file.name);
+    final form = html.FormData();
+    form.appendBlob('file', file, file.name);
 
-      final req = html.HttpRequest();
-      req
-        ..open('POST', 'http://13.125.208.240/api/v1/exercise/analyze')
-        ..setRequestHeader('Authorization', 'Bearer $token')
-        ..onLoadEnd.listen((_) {
-          if (req.status == 200) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('✅ 업로드 성공')),
-            );
+    final completer = Completer<Map<String, dynamic>>();
+    final req = html.HttpRequest();
+
+    req
+      ..open('POST', 'http://13.125.208.240/api/v1/exercise/analyze')
+      ..setRequestHeader('Authorization', 'Bearer $token')
+      ..onLoadEnd.listen((_) {
+        try {
+          if (req.status == 200 || req.status == 202) {
+            final decoded = jsonDecode(req.responseText ?? '{}');
+            print("[DEBUG] ✅ 서버 응답 수신 (웹): $decoded");
+            completer.complete(decoded);
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('❌ 업로드 실패 (${req.status})')),
-            );
+            completer.completeError("업로드 실패 (${req.status})");
           }
-        });
+        } catch (e) {
+          completer.completeError("응답 파싱 실패: $e");
+        }
+      });
 
-      req.send(form);
-    });
+    req.send(form);
+    return completer.future;
   }
 
   @override

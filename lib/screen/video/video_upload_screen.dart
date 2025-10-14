@@ -34,11 +34,25 @@ class VideoUploadScreen extends StatelessWidget {
     final adapter = FileAdapter();
 
     try {
-      await adapter.pickAndUpload(context, exercise);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('업로드 완료!')),
+      _showProgressDialog(context);
+
+      final result = await adapter.pickAndUpload(context, exercise);
+      Navigator.pop(context); // 로딩 닫기
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TodayWorkoutScreen(
+            name: result['exercise_type'] ?? '알 수 없음',
+            count: result['rep_count'] ?? 0,
+            calories: result['calories'] ?? 0,
+            accuracy: (result['accuracy'] ?? 90).toInt(),
+            date: DateTime.now().toString(),
+          ),
+        ),
       );
     } catch (e) {
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('업로드 실패: $e')),
       );
