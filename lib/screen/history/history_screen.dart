@@ -5,7 +5,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:http/http.dart' as http;
 import '../home/workout_list_screen.dart';
-import '../lib/util/token_helper.dart'; // ✅ TokenHelper 경로 확인 필요
+import 'package:body_log/util/token_helper.dart'; // ✅ TokenHelper 경로 확인 필요
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
