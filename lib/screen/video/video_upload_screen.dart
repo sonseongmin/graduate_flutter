@@ -60,7 +60,7 @@ class VideoUploadScreen extends StatelessWidget {
   }
 
   // ============================================================
-  // 로딩 다이얼로그
+  // 로딩 다이얼로그A
   // ============================================================
   void _showProgressDialog(BuildContext context) {
     showDialog(
