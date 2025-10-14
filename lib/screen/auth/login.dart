@@ -6,7 +6,7 @@ import '../../../UI/login_style.dart';
 import '../../../UI/input_field.dart';
 import '../../../util/token_helper.dart'; // ✅ 추가
 
-const baseUrl = 'http://13.209.49.34';
+const baseUrl = 'http://13.125.208.240';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
