@@ -1,34 +1,40 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenHelper {
-  static const _storage = FlutterSecureStorage();
-  static String? _cachedToken; // ✅ 메모리 캐시
+  static const _secureStorage = FlutterSecureStorage();
 
-  /// ✅ 토큰 읽기 (캐시 우선)
-  static Future<String?> getToken() async {
-    if (_cachedToken != null && _cachedToken!.isNotEmpty) {
-      return _cachedToken;
+  /// ✅ 토큰 저장
+  static Future<void> saveToken(String token) async {
+    if (kIsWeb) {
+      // 🌐 웹 환경 → SharedPreferences 사용
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('access_token', token);
+    } else {
+      // 📱 모바일 환경 → SecureStorage 사용
+      await _secureStorage.write(key: 'access_token', value: token);
     }
-    final token = await _storage.read(key: 'access_token');
-    _cachedToken = token;
-    return token;
   }
 
-  /// ✅ 토큰 저장 (캐시 즉시 반영)
-  static Future<void> saveToken(String token) async {
-    _cachedToken = token;
-    await _storage.write(key: 'access_token', value: token);
+  /// ✅ 토큰 조회
+  static Future<String?> getToken() async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('access_token');
+    } else {
+      return await _secureStorage.read(key: 'access_token');
+    }
   }
 
   /// ✅ 토큰 삭제
   static Future<void> deleteToken() async {
-    _cachedToken = null;
-    await _storage.delete(key: 'access_token');
-  }
-
-  /// ✅ 유효성 확인
-  static Future<bool> hasValidToken() async {
-    final token = await getToken();
-    return token != null && token.isNotEmpty;
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('access_token');
+    } else {
+      await _secureStorage.delete(key: 'access_token');
+    }
   }
 }
