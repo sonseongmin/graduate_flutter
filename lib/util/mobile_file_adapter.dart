@@ -21,7 +21,7 @@ class FileAdapterImpl implements IFileAdapter {
     final file = await _picker.pickVideo(source: ImageSource.gallery);
     if (file == null) return;
 
-    final uri = Uri.parse('http://13.125.219.3/api/v1/exercise/analyze');
+    final uri = Uri.parse('http://13.209.49.34/api/v1/exercise/analyze');
     final req = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = 'Bearer $token'
       ..files.add(await http.MultipartFile.fromPath('file', file.path));
@@ -45,7 +45,7 @@ class FileAdapterImpl implements IFileAdapter {
     final file = await _picker.pickVideo(source: ImageSource.camera);
     if (file == null) return;
 
-    final uri = Uri.parse('http://13.125.219.3/api/v1/exercise/analyze');
+    final uri = Uri.parse('http://13.209.49.34/api/v1/exercise/analyze');
     final req = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = 'Bearer $token'
       ..files.add(await http.MultipartFile.fromPath('file', file.path));

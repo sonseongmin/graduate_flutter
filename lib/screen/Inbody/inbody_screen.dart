@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:body_log/util/token_helper.dart';
 
-const baseUrl = "http://13.125.219.3";
+const baseUrl = "http://13.209.49.34";
 
 class InbodyScreen extends StatefulWidget {
   const InbodyScreen({super.key});
