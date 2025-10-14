@@ -19,19 +19,39 @@ class _HomeScreenState extends State<HomeScreen> {
   final DateTime now = DateTime.now();
   late final String today = DateFormat('yyyy.MM.dd').format(now);
 
-  // NOTE: 시간 및 피드백 필드 제거됨. 횟수 기반 데이터만 사용
-  final exerciseData = {
-    'name': '스쿼트',
-    'count': 20,
-    'calories': 80,
-    'accuracy': 85,
+  // ✅ 운동 데이터 (초기값)
+  Map<String, dynamic> exerciseData = {
+    'name': '-',
+    'count': 0,
+    'calories': 0,
+    'accuracy': 0,
   };
+
   @override
   void initState() {
     super.initState();
     fetchUserInfo();
+    fetchWorkout(); // ✅ 운동 기록 불러오기
   }
 
+  // ✅ 운동 이름 변환
+  String translateExercise(String type) {
+    switch (type) {
+      case 'squat':
+        return '스쿼트';
+      case 'pushup':
+        return '푸쉬업';
+      case 'pullup':
+        return '풀업';
+      case 'jumping_jack':
+      case 'jumpingjack':
+        return '점핑잭';
+      default:
+        return type;
+    }
+  }
+
+  // ✅ 사용자 정보 불러오기
   Future<void> fetchUserInfo() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
@@ -42,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('/api/me'),
+      Uri.parse('http://13.125.208.240/api/me'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -66,7 +86,44 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // 팝업 UI
+  // ✅ 운동 기록 불러오기
+  Future<void> fetchWorkout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) return;
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://13.125.208.240/api/v1/workouts'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> workouts = jsonDecode(utf8.decode(response.bodyBytes));
+
+        if (workouts.isNotEmpty) {
+          final latest = workouts.last; // ✅ 가장 최근 기록
+
+          setState(() {
+            exerciseData['name'] = translateExercise(latest['exercise_type']);
+            exerciseData['count'] = latest['rep_count'] ?? 0;
+            exerciseData['calories'] = latest['calories'] ?? 0;
+            exerciseData['accuracy'] = (latest['avg_accuracy'] ?? 0).toInt();
+          });
+
+          debugPrint('✅ 최신 운동 기록: $latest');
+        } else {
+          debugPrint('⚠️ 운동 기록 없음');
+        }
+      } else {
+        debugPrint('❌ 운동 기록 조회 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('❌ 네트워크 오류: $e');
+    }
+  }
+
+  // ✅ 환영 팝업
   void _showGreeting() {
     showGeneralDialog(
       context: context,
@@ -134,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // ⬇ 변경: 전체 GestureDetector 제거 → 정보 카드 + 하단 버튼(박스)로 분리
+              // ✅ 오늘의 운동 카드
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -143,62 +200,50 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: const Color(0xFFEAEAEA),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Builder(
-                  builder: (context) {
-                    final String exName = exerciseData['name'] as String;
-                    final int? countVal = (exerciseData['count'] as int?);
-                    final String countLabel = (countVal != null ? '${countVal}회' : '-');
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          '오늘의 운동',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      '오늘의 운동',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text('🏋️ ${exerciseData['name']} ${exerciseData['count']}회'),
+                    Text('🔥 칼로리 소모: ${exerciseData['calories']} kcal'),
+                    Text('정확도: ${exerciseData['accuracy']}%'),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                        backgroundColor: const Color(0xFF4E4E4E),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        const SizedBox(height: 8),
-                        Text('🏋️ $exName $countLabel'),
-                        Text('🔥 칼로리 소모: ${exerciseData['calories']} kcal'),
-                        const SizedBox(height: 12),
-
-                        SizedBox(
-                          width: 150,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                              backgroundColor: const Color(0xFF4E4E4E),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              elevation: 3,
-                            ),
-                            onPressed: () {
-                              final String exName = exerciseData['name'] as String;
-                              final int? countVal = (exerciseData['count'] as int?);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => TodayWorkoutScreen(
-                                    name: exName,
-                                    count: countVal,
-                                    calories: exerciseData['calories'] as int,
-                                    accuracy: exerciseData['accuracy'] as int,
-                                    date: today,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              '확인하기',
-                              style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TodayWorkoutScreen(
+                              name: exerciseData['name'],
+                              count: exerciseData['count'],
+                              calories: exerciseData['calories'],
+                              accuracy: exerciseData['accuracy'],
+                              date: today,
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        );
+                      },
+                      child: const Text(
+                        '확인하기',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+
+              // ✅ 추천 운동 카드
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -240,10 +285,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                    )
+                    ),
                   ],
                 ),
               ),
+
+              // ✅ 운동 히스토리
               GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/history');
@@ -264,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8),
-                      Text('하체 근육량 높음'),
+                      Text('터치하면 기록 페이지로 이동합니다'),
                     ],
                   ),
                 ),
