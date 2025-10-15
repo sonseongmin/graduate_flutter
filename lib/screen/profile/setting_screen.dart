@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:body_log/util/token_helper.dart'
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -22,18 +23,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadUserData();
   }
 
-  // 빈 값은 화면에 '-' 로 보이게 통일
+  // ✅ 공백이나 null일 때 "-" 로 표시
   String _displayOrDash(String? v) {
     final s = v?.trim() ?? '';
     if (s.isEmpty || s.toLowerCase() == 'null') return '-';
     return s;
   }
 
+  // ✅ 유저 정보 로드
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('user_name') ?? '';
-    final sex = prefs.getString('inbody_sex'); // 인바디에서 저장된 성별
-    final birth = prefs.getString('inbody_birth'); // 인바디에서 저장된 생년월일
+    final sex = prefs.getString('inbody_sex');
+    final birth = prefs.getString('inbody_birth');
 
     setState(() {
       userName = name;
@@ -44,8 +46,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
     debugPrint('🟢 이름: $name, 성별: $selectedGender, 생년월일: $birthDate');
   }
 
-  // ✅ 운동 기록 초기화 API 연동 함수
+  // ✅ 운동 기록 초기화 API 호출
   Future<void> resetWorkoutRecords() async {
+    final token = await TokenHelper.getToken();
+
+    if (token == null) {
+      Fluttertoast.showToast(msg: "로그인이 필요합니다.");
+      return;
+    }
+
+    final url = Uri.parse('http://13.125.208.240/api/v1/workouts/reset');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(msg: "✅ 운동 기록이 모두 삭제되었습니다.");
+      } else if (response.statusCode == 204) {
+        Fluttertoast.showToast(msg: "✅ 운동 기록이 초기화되었습니다.");
+      } else {
+        Fluttertoast.showToast(msg: "삭제 실패: ${response.statusCode}");
+        debugPrint("Response body: ${response.body}");
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: "네트워크 오류: $e");
+    }
+  }
+
+  // ✅ 확인 다이얼로그
+  void showResetConfirmDialog() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -59,51 +94,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-
-              final prefs = await SharedPreferences.getInstance();
-              final token = prefs.getString('jwt_token');
-
-              if (token == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('로그인이 필요합니다.')),
-                );
-                return;
-              }
-
-              final url =
-                  Uri.parse('http://13.125.208.240/api/v1/workouts/reset');
-
-              try {
-                final response = await http.delete(
-                  url,
-                  headers: {
-                    'Authorization': 'Bearer $token',
-                    'Content-Type': 'application/json',
-                  },
-                );
-
-                if (response.statusCode == 200 || response.statusCode == 204) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('✅ 운동 기록이 초기화되었습니다.')),
-                  );
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, '/history', (route) => false);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('초기화 실패: ${response.statusCode}'),
-                      backgroundColor: Colors.redAccent,
-                    ),
-                  );
-                }
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('서버 오류: $e'),
-                    backgroundColor: Colors.redAccent,
-                  ),
-                );
-              }
+              await resetWorkoutRecords();
             },
             child: const Text('확인'),
           ),
@@ -112,6 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // ✅ 로그아웃
   void logout() {
     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
@@ -140,9 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 24),
               const Center(child: Icon(Icons.account_circle, size: 60)),
               const SizedBox(height: 8),
-              Center(
-                  child:
-                      Text(userName, style: const TextStyle(fontSize: 18))),
+              Center(child: Text(userName, style: const TextStyle(fontSize: 18))),
               const Divider(height: 40, thickness: 2, color: Color(0xFF20221E)),
 
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -176,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ListTile(
                 leading: const Icon(Icons.restore),
                 title: const Text('운동 기록 초기화'),
-                onTap: resetWorkoutRecords,
+                onTap: showResetConfirmDialog, // ✅ 다이얼로그 연결
               ),
               ListTile(
                 leading: const Icon(Icons.logout),
