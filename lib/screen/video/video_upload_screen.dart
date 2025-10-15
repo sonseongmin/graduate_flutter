@@ -22,9 +22,7 @@ class VideoUploadScreen extends StatelessWidget {
   }
 
   String _baseHost() {
-    // ✅ Platform 제거, kIsWeb만 유지
-    //if (kIsWeb) return 'http://13.125.208.240';
-    return 'http://13.125.208.240'; // 모바일 (에뮬레이터)
+    return 'http://13.125.208.240';
   }
 
   // ============================================================
@@ -60,7 +58,7 @@ class VideoUploadScreen extends StatelessWidget {
   }
 
   // ============================================================
-  // 로딩 다이얼로그A
+  // 로딩 다이얼로그
   // ============================================================
   void _showProgressDialog(BuildContext context) {
     showDialog(
@@ -96,7 +94,6 @@ class VideoUploadScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-               // 🎥 촬영 버튼
                 ElevatedButton.icon(
                   onPressed: () {
                     if (kIsWeb) {
@@ -111,8 +108,9 @@ class VideoUploadScreen extends StatelessWidget {
                   },
                   icon: const Icon(Icons.videocam, color: Colors.black),
                   label: const Text(
-                      '실시간 촬영',
-                      style: TextStyle(color: Colors.black, fontSize: 20)),
+                    '실시간 촬영',
+                    style: TextStyle(color: Colors.black, fontSize: 20),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFEAEAEA),
                     minimumSize: const Size.fromHeight(60),
@@ -143,6 +141,31 @@ class VideoUploadScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+
+      // ✅ 하단 네비게이션 바 추가
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1, // 현재 페이지는 '영상'
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          final currentRoute = ModalRoute.of(context)?.settings.name;
+          if (index == 0 && currentRoute != '/home') {
+            Navigator.pushNamed(context, '/home');
+          } else if (index == 1 && currentRoute != '/video_upload') {
+            Navigator.pushNamed(context, '/video_upload');
+          } else if (index == 2 && currentRoute != '/history') {
+            Navigator.pushNamed(context, '/history');
+          } else if (index == 3 && currentRoute != '/settings') {
+            Navigator.pushNamed(context, '/settings');
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.ondemand_video), label: '영상'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: '기록'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
+        ],
       ),
     );
   }
