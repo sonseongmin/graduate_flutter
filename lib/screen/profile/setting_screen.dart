@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:body_log/util/token_helper.dart'
+import 'package:body_log/util/token_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
