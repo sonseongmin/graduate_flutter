@@ -41,7 +41,7 @@ class _InbodyScreenState extends State<InbodyScreen> {
   Future<void> fetchInbodyData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // ✅ 토큰 먼저 선언하고 나중에 null 체크
+    // ✅ 토큰을 TokenHelper로 통일
     final token = await TokenHelper.getToken();
     if (token == null) return;
 
@@ -119,7 +119,9 @@ class _InbodyScreenState extends State<InbodyScreen> {
 
   Future<void> saveInbodyData() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
+
+    // ✅ TokenHelper.getToken() 사용 (SharedPreferences 직접 접근 X)
+    final token = await TokenHelper.getToken();
 
     if (selectedGender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -135,7 +137,6 @@ class _InbodyScreenState extends State<InbodyScreen> {
       return;
     }
 
-    // ✅ baseUrl 누락 수정
     final response = await http.post(
       Uri.parse('$baseUrl/api/v1/inbody'),
       headers: {
@@ -153,7 +154,7 @@ class _InbodyScreenState extends State<InbodyScreen> {
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       await prefs.setString('inbody_sex', selectedGender ?? '');
       await prefs.setString('inbody_birth', normalizeDate(birthController.text));
 
