@@ -12,6 +12,7 @@ on:
       - ".dockerignore"
       - "nginx.conf"
       - "app.conf"
+      - "AndroidManifest.xml"
   workflow_dispatch:
 
 env:

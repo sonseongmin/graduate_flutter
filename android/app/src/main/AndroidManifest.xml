@@ -1,29 +1,28 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ✅ 카메라/마이크 권한: manifest의 최상위(=application 바깥)에 선언 -->
-    <uses-permission android:name="android.permission.CAMERA" />            <!-- 카메라 -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />      <!-- 동영상 녹화 시 오디오 -->
+    <!-- ✅ 필수: 서버 통신을 위해 인터넷 권한 추가 -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- (선택) 기기에 카메라 하드웨어가 있음을 선언.
-         카메라 없는 기기도 설치되게 하려면 required="false" 로 둔다 -->
+    <!-- ✅ 카메라/마이크 권한 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- (선택) 카메라 하드웨어 선언 -->
     <uses-feature
         android:name="android.hardware.camera.any"
-        android:required="false" />  <!-- ✅ -->
+        android:required="false" />
 
-    <!-- (선택/상황별) 저장소 접근:
-         - file_picker가 SAF를 쓰면 보통 불필요
-         - 갤러리에 저장/읽기가 꼭 필요하고 API 28 이하 타겟이면 아래 두 줄 고려
+    <!-- (선택) 저장소 접근: 갤러리 접근이 필요할 때만 주석 해제
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
-    -->
-    <!-- (선택/상황별) Android 13+에서 기기 갤러리의 동영상 직접 접근 시 필요
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     -->
 
     <application
         android:label="body_log"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">   <!-- ✅ HTTP 서버 허용 -->
 
         <activity
             android:name=".MainActivity"
@@ -45,14 +44,13 @@
             </intent-filter>
         </activity>
 
-        <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <!-- Don't delete the meta-data below -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
 
-    <!-- Flutter 텍스트 처리 플러그인이 쓰는 queries (원본 그대로) -->
+    <!-- Flutter 텍스트 처리 플러그인이 쓰는 queries -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
