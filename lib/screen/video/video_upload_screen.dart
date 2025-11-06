@@ -20,7 +20,50 @@ class VideoUploadScreen extends StatelessWidget {
   }
 
   // ============================================================
-  // 로딩 다이얼로그
+  // 🔹 업로드 처리 (갤러리 or 카메라)
+  // ============================================================
+  Future<void> _handleUpload(BuildContext context, String exercise,
+      {bool useCamera = false}) async {
+    final adapter = FileAdapter();
+    try {
+      _showProgressDialog(context);
+
+      final result = useCamera
+          ? await adapter.openCamera(context, exercise)
+          : await adapter.pickAndUpload(context, exercise);
+
+      Navigator.pop(context); // 다이얼로그 닫기
+
+      final data = result['data'] ?? {};
+      if (result['success'] == true && data.isNotEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TodayWorkoutScreen(
+              name: data['exercise_type'] ?? '알 수 없음',
+              count: data['rep_count'] ?? 0,
+              calories: (data['calories'] is num)
+                  ? (data['calories'] as num).toDouble()
+                  : 0.0,
+              date: DateTime.now().toString(),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('분석 결과를 불러오지 못했습니다.')),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('⚠️ 업로드 중 오류 발생: $e')),
+      );
+    }
+  }
+
+  // ============================================================
+  // 🔹 로딩 다이얼로그
   // ============================================================
   void _showProgressDialog(BuildContext context) {
     showDialog(
@@ -44,51 +87,7 @@ class VideoUploadScreen extends StatelessWidget {
   }
 
   // ============================================================
-  // 공통 업로드 핸들러 (카메라 / 갤러리 겸용)
-  // ============================================================
-  Future<void> _handleUpload(
-      BuildContext context, String exercise, bool useCamera) async {
-    final adapter = FileAdapter();
-
-    try {
-      _showProgressDialog(context);
-
-      final result = useCamera
-          ? await adapter.openCamera(context, exercise)
-          : await adapter.pickAndUpload(context, exercise);
-
-      Navigator.pop(context); // 로딩 닫기
-
-      final data = result['data'] ?? {};
-      if (result['success'] == true && data.isNotEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TodayWorkoutScreen(
-              name: data['exercise_type'] ?? '알 수 없음',
-              count: data['rep_count'] ?? 0,
-              calories: (data['calories'] is num)
-                  ? (data['calories'] as num).toDouble()
-                  : 0.0,
-              date: DateTime.now().toString(),
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ 분석 결과를 불러오지 못했습니다.')),
-        );
-      }
-    } catch (e) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('⚠️ 업로드 중 오류 발생: $e')),
-      );
-    }
-  }
-
-  // ============================================================
-  // UI 빌드
+  // 🔹 UI
   // ============================================================
   @override
   Widget build(BuildContext context) {
@@ -103,51 +102,32 @@ class VideoUploadScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 🎥 실시간 촬영 버튼
+                // 📷 실시간 촬영
                 ElevatedButton.icon(
-                  onPressed: () {
-                    if (kIsWeb) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('웹에서는 실시간 촬영을 지원하지 않습니다.'),
-                        ),
-                      );
-                    } else {
-                      _handleUpload(context, exercise, true); // ✅ 카메라
-                    }
-                  },
+                  onPressed: () => _handleUpload(context, exercise, useCamera: true),
                   icon: const Icon(Icons.videocam, color: Colors.black),
-                  label: const Text(
-                    '실시간 촬영',
-                    style: TextStyle(color: Colors.black, fontSize: 20),
-                  ),
+                  label: const Text('실시간 촬영',
+                      style: TextStyle(color: Colors.black, fontSize: 20)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFEAEAEA),
                     minimumSize: const Size.fromHeight(60),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    elevation: 3,
+                        borderRadius: BorderRadius.circular(30)),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
-                // 📂 운동 영상 업로드 버튼
+                // 📁 파일 업로드
                 ElevatedButton.icon(
-                  onPressed: () => _handleUpload(context, exercise, false), // ✅ 갤러리
+                  onPressed: () => _handleUpload(context, exercise),
                   icon: const Icon(Icons.upload_file, color: Colors.black),
-                  label: const Text(
-                    '운동 영상 업로드',
-                    style: TextStyle(color: Colors.black, fontSize: 20),
-                  ),
+                  label: const Text('운동 영상 업로드',
+                      style: TextStyle(color: Colors.black, fontSize: 20)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFEAEAEA),
                     minimumSize: const Size.fromHeight(60),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    elevation: 3,
+                        borderRadius: BorderRadius.circular(30)),
                   ),
                 ),
               ],
@@ -156,9 +136,7 @@ class VideoUploadScreen extends StatelessWidget {
         ),
       ),
 
-      // ============================================================
       // 하단 네비게이션 바
-      // ============================================================
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         selectedItemColor: Colors.black,

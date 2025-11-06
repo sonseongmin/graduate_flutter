@@ -8,124 +8,124 @@ import 'file_adapter.dart';
 class FileAdapterImpl implements IFileAdapter {
   final ImagePicker _picker = ImagePicker();
 
-  // ✅ 공통 서버 URL (필요하면 const로 빼도 됨)
+  // ✅ 공통 서버 URL (EC2 IP 유지)
   static const String _baseUrl = 'http://13.125.251.91/api/v1/exercise/analyze';
 
-  // ✅ 파일 업로드 (갤러리)
+  // ============================================================
+  // 🔹 갤러리에서 영상 선택 후 업로드
+  // ============================================================
   @override
   Future<Map<String, dynamic>> pickAndUpload(BuildContext context, String exercise) async {
-    final token = await TokenHelper.getToken();
-
-    if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.')),
-      );
-      return {'success': false, 'message': 'No token'};
-    }
-
-    // 🔸 비디오 선택
-    final file = await _picker.pickVideo(source: ImageSource.gallery);
-    if (file == null) {
-      return {'success': false, 'message': 'No file selected'};
-    }
-
     try {
+      final token = await TokenHelper.getToken();
+
+      if (token == null || token.isEmpty) {
+        _showSnack(context, '⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.');
+        return {'success': false, 'message': 'No token'};
+      }
+
+      final file = await _picker.pickVideo(source: ImageSource.gallery);
+      if (file == null) {
+        return {'success': false, 'message': 'No file selected'};
+      }
+
       final uri = Uri.parse(_baseUrl);
       final req = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
         ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
-      debugPrint('📡 [DEBUG] 업로드 요청 전송중... token=${token.substring(0, 10)}...');
-
+      debugPrint('📡 [DEBUG] 업로드 시작 - ${file.name}');
       final res = await req.send();
       final body = await res.stream.bytesToString();
 
-      debugPrint('📩 [DEBUG] 서버 응답 코드: ${res.statusCode}');
-      debugPrint('📩 [DEBUG] 서버 응답 본문: $body');
+      debugPrint('📩 [DEBUG] 응답코드: ${res.statusCode}');
+      debugPrint('📩 [DEBUG] 응답내용: $body');
 
       if (res.statusCode == 200 || res.statusCode == 202) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ 업로드 성공')),
-        );
+        final data = _tryParseJson(body);
+        _showSnack(context, '✅ 업로드 성공');
         return {
           'success': true,
           'status': res.statusCode,
-          'data': _tryParseJson(body),
+          'data': data,
         };
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ 업로드 실패 (${res.statusCode})')),
-        );
+        _showSnack(context, '❌ 업로드 실패 (${res.statusCode})');
         return {'success': false, 'status': res.statusCode, 'response': body};
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('⚠️ 업로드 중 오류 발생: $e')),
-      );
+    } catch (e, st) {
+      debugPrint('❌ [ERROR] pickAndUpload: $e\n$st');
+      _showSnack(context, '⚠️ 업로드 중 오류 발생: $e');
       return {'success': false, 'error': e.toString()};
     }
   }
 
-  // ✅ 카메라 촬영 업로드
+  // ============================================================
+  // 🔹 카메라로 촬영 후 업로드
+  // ============================================================
   @override
   Future<Map<String, dynamic>> openCamera(BuildContext context, String exercise) async {
-    final token = await TokenHelper.getToken();
-
-    if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.')),
-      );
-      return {'success': false, 'message': 'No token'};
-    }
-
-    final file = await _picker.pickVideo(source: ImageSource.camera);
-    if (file == null) {
-      return {'success': false, 'message': 'No video captured'};
-    }
-
     try {
+      final token = await TokenHelper.getToken();
+
+      if (token == null || token.isEmpty) {
+        _showSnack(context, '⚠️ 로그인 토큰이 없습니다. 다시 로그인해주세요.');
+        return {'success': false, 'message': 'No token'};
+      }
+
+      final file = await _picker.pickVideo(source: ImageSource.camera);
+      if (file == null) {
+        return {'success': false, 'message': 'No video captured'};
+      }
+
       final uri = Uri.parse(_baseUrl);
       final req = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
         ..files.add(await http.MultipartFile.fromPath('file', file.path));
 
-      debugPrint('📡 [DEBUG] 카메라 업로드 요청 전송중... token=${token.substring(0, 10)}...');
-
+      debugPrint('📡 [DEBUG] 카메라 업로드 시작 - ${file.name}');
       final res = await req.send();
       final body = await res.stream.bytesToString();
 
-      debugPrint('📩 [DEBUG] 서버 응답 코드: ${res.statusCode}');
-      debugPrint('📩 [DEBUG] 서버 응답 본문: $body');
+      debugPrint('📩 [DEBUG] 응답코드: ${res.statusCode}');
+      debugPrint('📩 [DEBUG] 응답내용: $body');
 
       if (res.statusCode == 200 || res.statusCode == 202) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ 업로드 성공')),
-        );
+        final data = _tryParseJson(body);
+        _showSnack(context, '✅ 업로드 성공');
         return {
           'success': true,
           'status': res.statusCode,
-          'data': _tryParseJson(body),
+          'data': data,
         };
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ 업로드 실패 (${res.statusCode})')),
-        );
+        _showSnack(context, '❌ 업로드 실패 (${res.statusCode})');
         return {'success': false, 'status': res.statusCode, 'response': body};
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('⚠️ 업로드 중 오류 발생: $e')),
-      );
+    } catch (e, st) {
+      debugPrint('❌ [ERROR] openCamera: $e\n$st');
+      _showSnack(context, '⚠️ 업로드 중 오류 발생: $e');
       return {'success': false, 'error': e.toString()};
     }
   }
 
-  // ✅ JSON 파싱 안전하게 처리
+  // ============================================================
+  // 🔹 JSON 파싱 (안전하게)
+  // ============================================================
   dynamic _tryParseJson(String raw) {
     try {
       return jsonDecode(raw);
     } catch (_) {
-      return raw;
+      return {'raw': raw};
+    }
+  }
+
+  // ============================================================
+  // 🔹 스낵바 헬퍼
+  // ============================================================
+  void _showSnack(BuildContext context, String message) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 }
