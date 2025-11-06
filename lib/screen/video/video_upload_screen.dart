@@ -34,8 +34,18 @@ class VideoUploadScreen extends StatelessWidget {
 
       Navigator.pop(context); // 다이얼로그 닫기
 
-      final data = result['data'] ?? {};
-      if (result['success'] == true && data.isNotEmpty) {
+      print('[DEBUG] 서버 응답: $result'); // 디버깅용 출력
+
+      // ✅ 서버 응답 구조 자동 감지
+      final bool isFlat = result.containsKey('exercise_type');
+      final Map<String, dynamic> data =
+          isFlat ? result : (result['data'] ?? {});
+
+      final bool isSuccess = isFlat ||
+          (result['success'] == true) ||
+          (result['status'] == 'success');
+
+      if (isSuccess && data.isNotEmpty) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -50,12 +60,14 @@ class VideoUploadScreen extends StatelessWidget {
           ),
         );
       } else {
+        print('[DEBUG] ❌ 분석 실패 - 응답 형식 또는 키 불일치: $result');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('분석 결과를 불러오지 못했습니다.')),
         );
       }
     } catch (e) {
       Navigator.pop(context);
+      print('[DEBUG] ⚠️ 업로드 오류: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('⚠️ 업로드 중 오류 발생: $e')),
       );
@@ -104,7 +116,8 @@ class VideoUploadScreen extends StatelessWidget {
               children: [
                 // 📷 실시간 촬영
                 ElevatedButton.icon(
-                  onPressed: () => _handleUpload(context, exercise, useCamera: true),
+                  onPressed: () =>
+                      _handleUpload(context, exercise, useCamera: true),
                   icon: const Icon(Icons.videocam, color: Colors.black),
                   label: const Text('실시간 촬영',
                       style: TextStyle(color: Colors.black, fontSize: 20)),
