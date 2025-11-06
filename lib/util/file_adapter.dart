@@ -6,7 +6,7 @@ import 'stub_adapter.dart'
 /// 공통 인터페이스
 abstract class IFileAdapter {
   Future<Map<String, dynamic>> pickAndUpload(BuildContext context, String exercise);
-  Future<Map><String, dynamic> openCamera(BuildContext context, String exercise);
+  Future<Map<String, dynamic>> openCamera(BuildContext context, String exercise);
 }
 
 /// 플랫폼별 구현체 주입
@@ -19,6 +19,6 @@ class FileAdapter {
   Future<Map<String, dynamic>> pickAndUpload(BuildContext context, String exercise) =>
       _impl.pickAndUpload(context, exercise);
 
-  Future<void> openCamera(BuildContext context, String exercise) =>
+  Futureap<String, dynamic>>(BuildContext context, String exercise) =>
       _impl.openCamera(context, exercise);
 }
