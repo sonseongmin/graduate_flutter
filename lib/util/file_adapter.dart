@@ -16,9 +16,11 @@ final IFileAdapter _impl = createFileAdapter();
 
 /// 퍼사드 클래스 (외부에서 이걸 사용)
 class FileAdapter {
-  Future<Map<String, dynamic>> pickAndUpload(BuildContext context, String exercise) =>
+  Future<Map<String, dynamic>> pickAndUpload(
+      BuildContext context, String exercise) =>
       _impl.pickAndUpload(context, exercise);
 
-  Future<Map<String, dynamic>>(BuildContext context, String exercise) =>
+  Future<Map<String, dynamic>> openCamera(
+      BuildContext context, String exercise) =>
       _impl.openCamera(context, exercise);
 }

@@ -52,9 +52,14 @@ class FileAdapterImpl implements IFileAdapter {
   }
 
   @override
-  Future<void> openCamera(BuildContext context, String exercise) async {
+  Future<Map<String, dynamic>> openCamera(BuildContext context, String exercise) async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('📷 웹에서는 카메라 촬영이 지원되지 않습니다.')),
     );
+
+    return {
+      'status': 'error',
+      'message': 'Camera not supported on web.'
+    };
   }
 }
