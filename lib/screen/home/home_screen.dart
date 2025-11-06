@@ -24,7 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
     'name': '-',
     'count': 0,
     'calories': 0,
-    'accuracy': 0,
   };
 
   @override
@@ -43,9 +42,14 @@ class _HomeScreenState extends State<HomeScreen> {
         return '푸쉬업';
       case 'pullup':
         return '풀업';
-      case 'jumping_jack':
       case 'jumpingjack':
         return '점핑잭';
+      case 'front_raise':
+        return '프론트레이즈';
+      case 'bench_press':
+        return '벤치프레스';
+      case 'sit_up':
+        return '싯업';
       default:
         return type;
     }
@@ -62,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('http://13.125.208.240/api/me'),
+      Uri.parse('http://13.125.251.91/api/me'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -94,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://13.125.208.240/api/v1/workouts'),
+        Uri.parse('http://13.125.251.91/api/v1/workouts'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -108,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
             exerciseData['name'] = translateExercise(latest['exercise_type']);
             exerciseData['count'] = latest['rep_count'] ?? 0;
             exerciseData['calories'] = latest['calories'] ?? 0;
-            exerciseData['accuracy'] = (latest['avg_accuracy'] ?? 0).toInt();
           });
 
           debugPrint('✅ 최신 운동 기록: $latest');
@@ -210,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 8),
                     Text('🏋️ ${exerciseData['name']} ${exerciseData['count']}회'),
                     Text('🔥 칼로리 소모: ${exerciseData['calories']} kcal'),
-                    Text('정확도: ${exerciseData['accuracy']}%'),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -228,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               name: exerciseData['name'],
                               count: exerciseData['count'],
                               calories: exerciseData['calories'],
-                              accuracy: exerciseData['accuracy'],
                               date: today,
                             ),
                           ),

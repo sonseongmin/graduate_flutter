@@ -3,7 +3,6 @@ class WorkoutData {
   final int count;
   final double calories;
   final int time;
-  final int accuracy;
   final List<String> issues;
 
   WorkoutData({
@@ -11,7 +10,6 @@ class WorkoutData {
     required this.count,
     required this.calories,
     required this.time,
-    required this.accuracy,
     required this.issues,
   });
 }

@@ -17,6 +17,9 @@ class WorkoutListScreen extends StatelessWidget {
     'pullup': {'name': '풀업', 'image': 'assets/pullup.png'},
     'squat': {'name': '스쿼트', 'image': 'assets/squat.png'},
     'jumpingjack': {'name': '점핑잭', 'image': 'assets/jumping_jack.png'},
+    'front_raise': {'name': '프론트레이즈', 'image': 'assets/front_raise.png'},
+    'bench_press': {'name': '벤치프레스', 'image': 'assets/bench_press.png'},
+    'sit_up': {'name': '싯업', 'image': 'assets/sit_up.png'},
   };
 
   // ✅ 한글 이름 변환
@@ -70,7 +73,6 @@ class WorkoutListScreen extends StatelessWidget {
                       name: displayName,
                       count: rawCount,
                       calories: calories,
-                      accuracy: ((workout['accuracy'] as double) * 100).toInt(),
                       date: date,
                     ),
                   ),

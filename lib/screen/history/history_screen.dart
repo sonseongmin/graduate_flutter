@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:http/http.dart' as http;
 import '../home/workout_list_screen.dart';
@@ -46,43 +45,44 @@ class _HistoryScreenState extends State<HistoryScreen> {
           'Content-Type': 'application/json',
         },
       );
+
       debugPrint("🔥 현재 토큰: $token");
+
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-      setState(() {
-        allData = data.map((item) {
-          final rawDate = item['ended_at'];
-          DateTime parsedDate;
+        setState(() {
+          allData = data.map((item) {
+            final rawDate = item['ended_at'];
+            DateTime parsedDate;
 
-          if (rawDate == null || rawDate.toString().trim().isEmpty) {
-            parsedDate = DateTime.now();
-          } else {
-            try {
-              parsedDate = DateTime.parse(rawDate);
-            } catch (_) {
+            if (rawDate == null || rawDate.toString().trim().isEmpty) {
+              parsedDate = DateTime.now();
+            } else {
               try {
-                parsedDate = DateFormat('yyyy.MM.dd').parse(rawDate);
+                parsedDate = DateTime.parse(rawDate);
               } catch (_) {
-                parsedDate = DateTime.now();
+                try {
+                  parsedDate = DateFormat('yyyy.MM.dd').parse(rawDate);
+                } catch (_) {
+                  parsedDate = DateTime.now();
+                }
               }
             }
-          }
 
-          final date = DateFormat('yyyy.MM.dd').format(parsedDate);
+            final date = DateFormat('yyyy.MM.dd').format(parsedDate);
 
-          return {
-            'date': date,
-            'name': item['exercise_type'] ?? 'Unknown',
-            'count': item['rep_count'] ?? 0,
-            'calories': (item['calories'] ?? 0).toDouble(),
-            'time': 10,
-            'accuracy': ((item['avg_accuracy'] ?? 0) / 100.0).toDouble(),
-          };
-        }).toList();
+            return {
+              'date': date,
+              'name': item['exercise_type'] ?? 'Unknown',
+              'count': item['rep_count'] ?? 0,
+              'calories': (item['calories'] ?? 0).toDouble(),
+              'time': 10,
+            };
+          }).toList();
 
-        isLoading = false;
-      });
+          isLoading = false;
+        });
 
         debugPrint("✅ 운동 기록 ${allData.length}개 불러옴");
       } else {
@@ -146,8 +146,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
                       IconButton(
-                        icon:
-                            const Icon(Icons.calendar_today, color: Colors.white),
+                        icon: const Icon(Icons.calendar_today, color: Colors.white),
                         onPressed: () async {
                           DateTime tempSelectedDay = selectedDay;
 
@@ -158,8 +157,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 return AlertDialog(
                                   contentPadding: const EdgeInsets.all(12),
                                   content: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.9,
+                                    width: MediaQuery.of(context).size.width * 0.9,
                                     height: 450,
                                     child: Column(
                                       children: [
@@ -179,18 +177,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         ),
                                         const SizedBox(height: 10),
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                          mainAxisAlignment: MainAxisAlignment.end,
                                           children: [
                                             TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
+                                              onPressed: () => Navigator.pop(context),
                                               child: const Text('취소'),
                                             ),
                                             TextButton(
                                               onPressed: () {
-                                                setState(() => selectedDay =
-                                                    tempSelectedDay);
+                                                setState(
+                                                    () => selectedDay = tempSelectedDay);
                                                 Navigator.pop(context);
                                               },
                                               child: const Text('확인'),
@@ -216,13 +212,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     children: groupedData.entries.map((entry) {
                       String date = entry.key;
                       List<Map<String, dynamic>> exercises = entry.value;
-
-                      double averageAccuracy = exercises.isNotEmpty
-                          ? exercises
-                                  .map((e) => e['accuracy'] as double)
-                                  .fold(0.0, (prev, val) => prev + val) /
-                              exercises.length
-                          : 0.0;
 
                       return GestureDetector(
                         onTap: exercises.isNotEmpty
@@ -251,30 +240,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(date,
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold)),
+                                    Text(
+                                      date,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                     const SizedBox(height: 4),
-                                    Text(exercises.isNotEmpty
-                                        ? '운동 개수: ${exercises.length}개'
-                                        : '쉬어가는 날 😌'),
+                                    Text(
+                                      exercises.isNotEmpty
+                                          ? '운동 개수: ${exercises.length}개'
+                                          : '쉬어가는 날 😌',
+                                    ),
                                   ],
                                 ),
-                              ),
-                              CircularPercentIndicator(
-                                radius: 30,
-                                lineWidth: 8,
-                                percent: exercises.isNotEmpty
-                                    ? averageAccuracy.clamp(0.0, 1.0)
-                                    : 0.0,
-                                center: Text(exercises.isNotEmpty
-                                    ? '${(averageAccuracy * 100).toInt()}%'
-                                    : '0%'),
-                                progressColor: exercises.isNotEmpty
-                                    ? Colors.green
-                                    : Colors.grey,
-                                backgroundColor: Colors.grey[300]!,
                               ),
                             ],
                           ),
@@ -304,8 +284,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.ondemand_video), label: '영상'),
+          BottomNavigationBarItem(icon: Icon(Icons.ondemand_video), label: '영상'),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: '기록'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
         ],

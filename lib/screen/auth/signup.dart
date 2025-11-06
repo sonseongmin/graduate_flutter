@@ -9,7 +9,7 @@ import '../../../UI/input_field.dart';
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
-  static const String baseUrl = 'http://13.125.208.240';
+  static const String baseUrl = 'http://13.125.251.91';
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();

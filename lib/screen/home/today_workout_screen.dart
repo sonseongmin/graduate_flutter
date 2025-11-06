@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,7 +8,6 @@ class TodayWorkoutScreen extends StatefulWidget {
   final String name;       // 운동 이름 (영어 or 한글)
   final int? count;        // 반복 횟수
   final double calories;   // 칼로리 (double로 통일)
-  final int accuracy;      // 정확도 (%)
   final String date;       // 날짜
 
   const TodayWorkoutScreen({
@@ -17,7 +15,6 @@ class TodayWorkoutScreen extends StatefulWidget {
     required this.name,
     this.count,
     required this.calories,
-    required this.accuracy,
     required this.date,
   });
 
@@ -34,6 +31,9 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
     'pullup': {'name': '풀업', 'image': 'assets/pullup.png'},
     'squat': {'name': '스쿼트', 'image': 'assets/squat.png'},
     'jumpingjack': {'name': '점핑잭', 'image': 'assets/jumping_jack.png'},
+    'front_raise': {'name': '프론트레이즈', 'image': 'assets/front_raise.png'},
+    'bench_press': {'name': '벤치프레스', 'image': 'assets/bench_press.png'},
+    'sit_up': {'name': '싯업', 'image': 'assets/sit_up.png'},
   };
 
   // ✅ 한글 이름 반환 (영어든 한글이든 모두 대응)
@@ -74,7 +74,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
   Future<void> saveWorkout() async {
     setState(() => _isLoading = true);
 
-    final url = Uri.parse('http://13.125.208.240/api/v1/workouts');
+    final url = Uri.parse('http://13.125.251.91/api/v1/workouts');
     final token = await getToken();
 
     if (token == null) {
@@ -89,7 +89,6 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
       "started_at": now.subtract(const Duration(minutes: 10)).toIso8601String(),
       "ended_at": now.toIso8601String(),
       "rep_count": widget.count ?? 0,
-      "avg_accuracy": widget.accuracy,
       "calories": widget.calories,
     });
 
@@ -127,7 +126,6 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
   Widget build(BuildContext context) {
     final displayName = getExerciseName(widget.name);
     final imagePath = getImagePath(widget.name);
-    final percent = (widget.accuracy.clamp(0, 100)) / 100.0;
 
     return Scaffold(
       backgroundColor: const Color(0xFF20221E),
@@ -250,20 +248,6 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
                               ],
                             ),
                           ),
-                          CircularPercentIndicator(
-                            radius: 35.0,
-                            lineWidth: 6.0,
-                            percent: percent,
-                            center: Text(
-                              '${widget.accuracy}%',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            progressColor: const Color(0xFF20221E),
-                            backgroundColor: Colors.grey.shade300,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('올바른 자세 비율'),
-                        ],
                       ),
                       const SizedBox(height: 16),
                       Center(

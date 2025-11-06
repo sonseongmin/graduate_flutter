@@ -56,7 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    final url = Uri.parse('http://13.125.208.240/api/v1/workouts/reset');
+    final url = Uri.parse('http://13.125.251.91/api/v1/workouts/reset');
 
     try {
       final response = await http.delete(

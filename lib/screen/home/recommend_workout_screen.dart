@@ -26,6 +26,9 @@ class RecommendWorkoutScreen extends StatelessWidget {
     if (n.contains('풀업')) return 'assets/pullup.png';
     if (n.contains('푸쉬업')) return 'assets/pushup.png';
     if (n.contains('점핑잭')) return 'assets/jumping_jack.png';
+    if (n.contains('싯업')) return 'assets/sit_up.png';
+    if (n.contains('프론트레이즈')) return 'assets/front_raise.png';
+    if (n.contains('벤치프레스')) return 'assets/bench_press.png';
 
     return 'assets/logo2.png';
   }

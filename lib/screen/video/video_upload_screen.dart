@@ -22,7 +22,7 @@ class VideoUploadScreen extends StatelessWidget {
   }
 
   String _baseHost() {
-    return 'http://13.125.208.240';
+    return 'http://13.125.251.91';
   }
 
   // ============================================================
