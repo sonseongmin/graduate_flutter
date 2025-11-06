@@ -44,7 +44,6 @@ class VideoUploadScreen extends StatelessWidget {
             name: result['exercise_type'] ?? '알 수 없음',
             count: result['rep_count'] ?? 0,
             calories: result['calories'] ?? 0,
-            accuracy: (result['avg_accuracy'] ?? 90).toInt(),
             date: DateTime.now().toString(),
           ),
         ),

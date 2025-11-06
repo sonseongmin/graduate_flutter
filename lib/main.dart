@@ -56,7 +56,6 @@ class BodyLogApp extends StatelessWidget {
         '/exercise_category': (context) => TodayWorkoutScreen(
           name: '스쿼트',
           calories: 0,
-          accuracy: 0,
           date: '',
           ),
       },
