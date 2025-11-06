@@ -248,6 +248,7 @@ class _TodayWorkoutScreenState extends State<TodayWorkoutScreen> {
                               ],
                             ),
                           ),
+                        ]
                       ),
                       const SizedBox(height: 16),
                       Center(
