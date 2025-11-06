@@ -11,7 +11,7 @@ class WorkoutListScreen extends StatelessWidget {
     required this.workouts,
   });
 
-  // ✅ 영어 → 한글 + 이미지 매핑 (static const로 선언)
+  // ✅ 영어 → 한글 + 이미지 매핑
   static const Map<String, Map<String, String>> exerciseMap = {
     'pushup': {'name': '푸쉬업', 'image': 'assets/pushup.png'},
     'pullup': {'name': '풀업', 'image': 'assets/pullup.png'},
@@ -55,12 +55,17 @@ class WorkoutListScreen extends StatelessWidget {
           itemCount: workouts.length,
           itemBuilder: (context, index) {
             final workout = workouts[index];
-            final displayName = getExerciseName(workout['name']);
-            final imagePath = getImagePath(workout['name']);
-            final int? rawCount = workout['count'] as int?;
+
+            // ✅ exercise_type → name → fallback 순서로 안전하게 처리
+            final exerciseKey = workout['exercise_type'] ?? workout['name'] ?? 'unknown';
+            final displayName = getExerciseName(exerciseKey);
+            final imagePath = getImagePath(exerciseKey);
+
+            // ✅ rep_count 또는 count 키 모두 커버
+            final int? rawCount = (workout['rep_count'] ?? workout['count']) as int?;
             final String countLabel = (rawCount != null ? '${rawCount}회' : '-');
 
-            // ✅ double로 변환
+            // ✅ double 변환 안전 처리
             final double calories =
                 (workout['calories'] is num) ? (workout['calories'] as num).toDouble() : 0.0;
 
