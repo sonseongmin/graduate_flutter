@@ -19,6 +19,6 @@ class FileAdapter {
   Future<Map<String, dynamic>> pickAndUpload(BuildContext context, String exercise) =>
       _impl.pickAndUpload(context, exercise);
 
-  Futureap<String, dynamic>>(BuildContext context, String exercise) =>
+  Future<Map<String, dynamic>>(BuildContext context, String exercise) =>
       _impl.openCamera(context, exercise);
 }
